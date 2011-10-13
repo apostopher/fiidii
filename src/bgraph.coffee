@@ -204,18 +204,22 @@ class global.BGraph
 
   # Public method: This method accepts X and Y values and draws chart.
   # Currently this supports only one chart.
-  draw: () ->
+  draw: (start = 0, end) ->
     #private variables
     p = []
     
-    gridRange = yData.length
+    #set active data
+    activeYData = yData.slice start, end
+    activeXData = xData.slice start, end
+
+    gridRange = activeYData.length
     if not gridRange
       @setMessage "Empty dataset..."
       return false
 
     # Get max and min of chart data
-    max = Math.max yData...
-    min = Math.min yData...
+    max = Math.max activeYData...
+    min = Math.min activeYData...
     
     yRange = getYRange 8, min, max
     if yRange?
@@ -237,7 +241,7 @@ class global.BGraph
     drawGrid leftgutter + X * .5, topgutter + .5, @options.width - leftgutter - X, @options.height - topgutter - bottomgutter, gridRange - 1, 8
 
     # Create X-Axis labels from date array
-    labels = _.map xData, (date) -> do date.getDate + "-" + months[do date.getMonth]
+    labels = _.map activeXData, (date) -> do date.getDate + "-" + months[do date.getMonth]
 
     #draw labels
     drawLabels leftgutter + X * .5, topgutter + .5, @options.height - topgutter - bottomgutter, 8, yRange
@@ -246,14 +250,14 @@ class global.BGraph
     linepath = do r.path
     linepath.attr lineAttr
     for i in [0...gridRange]
-      y = @options.height - bottomgutter - Y * (yData[i] - min)
+      y = @options.height - bottomgutter - Y * (activeYData[i] - min)
       x = Math.round leftgutter + X * (i + .5)
 
       p = ["M", x, y, "C", x, y] if i is 0
       if i isnt 0 and i < gridRange - 1
-        Y0 = @options.height - bottomgutter - Y * (yData[i - 1] - min)
+        Y0 = @options.height - bottomgutter - Y * (activeYData[i - 1] - min)
         X0 = Math.round leftgutter + X * (i - .5)
-        Y2 = @options.height - bottomgutter - Y * (yData[i + 1] - min)
+        Y2 = @options.height - bottomgutter - Y * (activeYData[i + 1] - min)
         X2 = Math.round leftgutter + X * (i + 1.5)
         a = getAnchors X0, Y0, x, y, X2, Y2
         p = p.concat [a.x1, a.y1, x, y, a.x2, a.y2]

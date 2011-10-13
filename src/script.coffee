@@ -1,6 +1,13 @@
 loadGraph = new BGraph holder: "chartcontent", height: 500, type: "l"
 loadGraph.setMessage "Loading..."
 
+dateDiff = (a, b) ->
+  aArray = a.date.split "-"
+  bArray = b.date.split "-"
+  aDate = new Date aArray[0], aArray[1] - 1, aArray[2]
+  bDate = new Date bArray[0], bArray[1] - 1, bArray[2]
+  aDate - bDate
+
 $.getJSON '/tools/fiidii/serverscripts/fiidii.php', (response) ->
   txt         =
     font         : '12px Helvetica, Arial', "font-weight": "bold"
@@ -9,8 +16,9 @@ $.getJSON '/tools/fiidii/serverscripts/fiidii.php', (response) ->
     font         : '10px Helvetica, Arial'
     fill         : "#666"
   months         =  ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-
-  loadGraph.setData response.curr, "bb_date", "usd"
+  
+  sortedCurr = response.curr.sort dateDiff
+  loadGraph.setData sortedCurr, "bb_date", "usd"
   r = loadGraph.paper
   label = do r.set
   label_visible = false
@@ -48,5 +56,5 @@ $.getJSON '/tools/fiidii/serverscripts/fiidii.php', (response) ->
       label_visible = false
     , 1
           
-  do loadGraph.draw
+  loadGraph.draw 0, 25
   
