@@ -35,7 +35,7 @@
 			"file": "src/bgraph.coffee",
 			"settings":
 			{
-				"buffer_size": 11845,
+				"buffer_size": 12017,
 				"line_ending": "Unix"
 			}
 		},
@@ -51,7 +51,7 @@
 			"file": "lib/bgraph.js",
 			"settings":
 			{
-				"buffer_size": 13246,
+				"buffer_size": 13532,
 				"line_ending": "Unix"
 			}
 		},
@@ -167,6 +167,10 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"drawLabels",
+			"yLabels",
+			"r",
+			"events",
 			"\"",
 			"dataL"
 		],
@@ -182,7 +186,7 @@
 		"reverse": false,
 		"show_context": true,
 		"use_buffer": true,
-		"whole_word": false,
+		"whole_word": true,
 		"wrap": true
 	},
 	"groups":
@@ -276,15 +280,15 @@
 					"file": "src/bgraph.coffee",
 					"settings":
 					{
-						"buffer_size": 11845,
+						"buffer_size": 12017,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								8077,
-								8077
+								11440,
+								11440
 							]
 						],
 						"settings":
@@ -294,7 +298,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 4512.0,
+						"translation.y": 2896.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -332,7 +336,7 @@
 					"file": "lib/bgraph.js",
 					"settings":
 					{
-						"buffer_size": 13246,
+						"buffer_size": 13532,
 						"regions":
 						{
 						},
@@ -350,7 +354,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2220.0,
+						"translation.y": 204.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
