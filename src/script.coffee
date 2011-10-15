@@ -11,6 +11,9 @@ prepareData = (rawData, dateField) ->
   
   sortedData = rawData.sort dateDiff
 
+toRound = (value) ->
+  return (Math.round(value * 100) / 100).toFixed 2
+
 $.getJSON '/tools/fiidii/serverscripts/fiidii.php', (response) ->
   txt         =
     font         : '12px Helvetica, Arial', "font-weight": "bold"
@@ -33,21 +36,21 @@ $.getJSON '/tools/fiidii/serverscripts/fiidii.php', (response) ->
 
   ($ "#fiibuy").html response.fb
   ($ "#fiisell").html response.fs
-  fiinet = ((response.fb * 100 - response.fs * 100) / 100)
+  fiinet = toRound response.fb - response.fs
   ($ "#fiinet").html fiinet
   if fiinet < 0 then ($ "#fiinet").addClass "red"
 
   ($ "#diibuy").html response.db
   ($ "#diisell").html response.ds
-  diinet = ((response.db * 100 - response.ds * 100) / 100)
+  diinet = toRound response.db - response.ds
   ($ "#diinet").html diinet
   if diinet < 0 then ($ "#diinet").addClass "red"
 
-  fiidiibuy = (response.fb * 100 + response.db * 100) / 100
-  fiidiisell = (response.fs * 100 + response.ds * 100) / 100
+  fiidiibuy = toRound 1 * response.fb + 1 * response.db
+  fiidiisell = toRound 1 * response.fs + 1 * response.ds
   ($ "#fiidiibuy").html fiidiibuy
   ($ "#fiidiisell").html fiidiisell
-  fiidiinet = (((fiidiibuy * 100) - (fiidiisell * 100)) / 100)
+  fiidiinet = toRound fiidiibuy - fiidiisell
   ($ "#fiidiinet").html fiidiinet
   if fiidiinet < 0 then ($ "#fiidiinet").addClass "red"
   

@@ -141,12 +141,14 @@ class global.BGraph
 
   # Private method: This method is used by hover and redraw functions
   # This is created as per DRY. as two functions need same functionality
-  attachHover = (rect, index, overFn, outFn, dots, activeXData, activeYData) ->
+  attachHover = (rect, index, overFn, outFn, dots, blanket, activeXData, activeYData) ->
     rect.hover ->
       overFn.call @, rect, dots[index], activeYData[index], activeXData[index]
+      do blanket.toFront
       true
     , ->
       outFn.call @, rect, dots[index], activeYData[index], activeXData[index]
+      do blanket.toFront
       true
     true
   
@@ -357,7 +359,7 @@ class global.BGraph
       blanketLength = @chartOptions.blanket.length
       rect = @chartOptions.blanket[blanketLength - 1]
       
-      attachHover.call @, rect, blanketLength - 1, @events.hover.overFn, @events.hover.outFn, @chartOptions.dots, activeXData, activeYData
+      attachHover.call @, rect, blanketLength - 1, @events.hover.overFn, @events.hover.outFn, @chartOptions.dots, @chartOptions.blanket, activeXData, activeYData
 
     p = p.concat [x, y, x, y]
     @chartOptions.linepath.attr path: p
