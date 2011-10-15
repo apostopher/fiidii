@@ -91,23 +91,18 @@ h2
       text-align   :   justify
 
 #datadiv
-  border           :   4px solid lighten($default_border, 5%)
   margin-top       :   $default_space
-  background       :   white
-  +border-radius(4px)
 
 #datatable
   border-collapse  :   collapse
   width            :   100%
-
-  tr
-    border-bottom  :   1px solid $default_border
   
   .last
     border-bottom  :   0
 
   td, th
     padding        :   $default_space / 3 $default_space / 6
+    border-bottom  :   1px solid $default_border
     color          :   $sub_text_color
     font:
       size         :   $p_text_size
@@ -115,10 +110,18 @@ h2
   
   th
     text-align     :   center
+  td
+    color          :   forestGreen
 
   td.value
-    color          :   $active_blue
     text-align     :   center
+  
+  td.red
+    color          :   fireBrick
+
+  td.stattype
+    width          :   20%
+    color          :   $sub_text_color
 
 #formholder
   background       :   white
@@ -169,7 +172,7 @@ h2
       weight       :   500
   
   .currvalue
-    border-top     :   1px solid $default_border
+    border-bottom  :   1px solid $default_border
     text-align     :   right
     padding        :   $default_space / 3 $default_space / 6
     color          :   $active_blue

@@ -3,7 +3,6 @@ global = exports ? this
 class global.BGraph
 
   # Private vars.
-  r              =  null
   yLabels        =  null
   xLabels        =  null
   dots           =  null
@@ -12,7 +11,6 @@ class global.BGraph
   linepath       =  null
   yData          =  []
   xData          =  []
-  events         =  {}
   leftgutter     =  30
   topgutter      =  20
   bottomgutter   =  50
@@ -36,26 +34,36 @@ class global.BGraph
   txt         =
       font         : '11px Helvetica, Arial'
       fill         : "#666"
+  
+  txtLY         =
+    font         : '12px Helvetica, Arial', "font-weight": "bold"
+    fill         : "#3C60A4"
+  txtLX        =
+    font         : '10px Helvetica, Arial'
+    fill         : "#666"
 
   constructor: (@options) ->
 
     if not options.width? then options.width = do ($ "#" + options.holder).width
-    @paper = r = Raphael options.holder, options.width, options.height
+    @paper = Raphael options.holder, options.width, options.height
 
-    # These are the private variables again which depend on r
-    yLabels        =  do r.set
-    xLabels        =  do r.set
-    dots           =  do r.set
-    chartMsg       =  do r.set
-    blanket        =  do r.set
-    linepath       =  do r.path
+    # These are the private variables which depend on @paper
+    yLabels        =  do @paper.set
+    xLabels        =  do @paper.set
+    chartMsg       =  do @paper.set
+    blanket        =  do @paper.set
 
+    # Events object
+    @events        =  hover :
+                        overFn : null
+                        outFn  : null
+    @popup         =  yFormat :  "", xFormat : ""
     #get data from options.
     if options.data
       loadData options.data, options.type, options.xname, options.yname
   
   # Private method: This method draws the graph grid.
-  drawGrid = (x, y, w, h, wv, hv) ->
+  drawGrid = (r, x, y, w, h, wv, hv) ->
     gridPath = []
     axisPath = []
     rowHeight = h / hv
@@ -74,16 +82,16 @@ class global.BGraph
     (r.path axisPath.join ",").attr stroke: "#ccc"
   
   # Private method: This method draws the Y-axis labels.
-  drawLabels = (x, y, h, hv, yRange) ->
+  drawLabels = (r, x, y, h, hv, yRange) ->
     xRound = Math.round x
     rowHeight = h / hv
 
     for i in [0..hv]
       yStep = (yRange.endPoint - (i * yRange.step)).toFixed 2
-      yLabel = r.text xRound, Math.round(y + i * rowHeight) + .5, yStep
+      yLabel = r.text 0, Math.round(y + i * rowHeight) + .5, yStep
       yLabels.push yLabel
       yWidth = yWidth || yLabel.getBBox().width
-      txtY.x || txtY.x = xRound - yWidth - 5
+      txtY.x = xRound - yWidth - 5
       yLabel.attr(txtY).toBack()
     true
 
@@ -134,19 +142,20 @@ class global.BGraph
 
   # Private method: This method is used by hover and redraw functions
   # This is created as per DRY. as two functions need same functionality
-  attachHover = (rect, index, overFn, outFn) ->
+  attachHover = (rect, index, overFn, outFn, activeXData, activeYData) ->
     rect.hover ->
-      overFn.call @, rect, dots[index], yData[index], xData[index]
+      overFn.call @, rect, dots[index], activeYData[index], activeXData[index]
       do blanket.toFront
       true
     , ->
-      outFn.call @, rect, dots[index], yData[index], xData[index]
+      outFn.call @, rect, dots[index], activeYData[index], activeXData[index]
       do blanket.toFront
       true
     true
   
   #Private method: load data
   loadData = (data, type = "l", xname = "x", yname = "y") ->
+
     yData = _.map data, (dataItem) -> +dataItem[yname] || 0
 
     if type is "l"
@@ -157,14 +166,54 @@ class global.BGraph
     else
       xData = _.map data, (dataItem) -> dataItem.x
 
+  # Public method: default over function
+  defaultHoverFns: () ->
+    frameAttr = fill: "#F9FAFC", stroke: "#DBDCDE", "stroke-width": 1, "fill-opacity": 1
+    label = do @paper.set
+    label_visible = false
+    leave_timer = 0
+    r = @paper
+    label.push (@paper.text 60, 12, "").attr txtLY
+    label.push (@paper.text 60, 27, "").attr txtLX
+    do label.hide
+    frame = (@paper.popup 100, 100, label, "right").attr(frameAttr).hide()
+
+    overFn = (rect, dot, data, date) ->
+      clearTimeout leave_timer
+      label[0].attr text: data + " thousand crore Rs."
+      label[1].attr text: do date.getDate + "-" + months[do date.getMonth] + "-" + date.getFullYear()
+      side = "right"
+      side = "left"  if (dot.attr "cx") + frame.getBBox().width > r.width
+      ppp = @paper.popup (dot.attr "cx"), (dot.attr "cy"), label, side, 1
+      lx = label[0].transform()[0][1] + ppp.dx
+      ly = label[0].transform()[0][2] + ppp.dy
+      anim = Raphael.animation {path: ppp.path, transform: ["t", ppp.dx, ppp.dy]}, 200 * label_visible
+      frame.show().stop().animate anim
+      label[0].show().stop().animateWith frame, anim, {transform: ["t", lx, ly]}, 200 * label_visible
+      label[1].show().stop().animateWith frame, anim, {transform: ["t", lx, ly]}, 200 * label_visible
+      dot.attr "r", 6
+      label_visible = true
+      do frame.toFront
+      do label.toFront
+
+    outFn = (rect, dot, data, date) ->
+      dot.attr "r", 4
+      leave_timer = setTimeout ->
+        do frame.hide
+        do label[0].hide
+        do label[1].hide
+        label_visible = false
+      , 1
+
+    {overFn, outFn}
+
   # Public method: set the chart data. This is useful when chart data is received
   # in AJAX request. The loading message can be displayed till the data is received.
   setData: (data, xname, yname) ->
     @options.data = data
-    if xname then @options.xname = xname
-    if yname then @options.yname = yname
-
-    loadData data, @options.type, @options.xname, @options.yname
+    @options.xname = xname
+    @options.yname = yname
+    loadData data, @options.type, xname, yname
     @
 
   # Public method: attach user-specific hover event handlers to blanket elements.
@@ -173,14 +222,20 @@ class global.BGraph
   # hover event handlers
   hover: (overFn, outFn) ->
     # check whether event object has hover
-    events.hover = {overFn, outFn}
+    @events.hover = {overFn, outFn}
     if blanket.length isnt 0
       for rect, index in blanket
         attachHover.call @, rect, index, overFn, outFn
     @
+
+  # Public method: set the labels for default popup
+  setHoverLabels: (yL, xL) ->
+    if yL then @popup.yFormat = yL
+    if xL then @popup.xFormat = xL
+    @
        
   toString: ->
-    "You are using Bgraph version 0.2."
+    "Bgraph version 0.2."
 
   # Public method: Used to post a message on canvas. center aligned vertically
   # as well as horizontally. Useful to post a message while we are fetching the
@@ -195,7 +250,7 @@ class global.BGraph
 
     # chartMsg is a set of messages. Can hold multiple messages
     do chartMsg.remove
-    msg = (r.text @options.width / 2, @options.height / 2, message).attr (style ? txtMsg)
+    msg = (@paper.text @options.width / 2, @options.height / 2, message).attr (style ? txtMsg)
 
     # add message to chartMsg
     chartMsg.push msg
@@ -208,6 +263,35 @@ class global.BGraph
     #private variables
     p = []
     
+    # clear the stage
+    if yLabels?.length
+      do yLabels.remove
+      delete yLabels
+      yLabels = do @paper.set
+
+    if xLabels?.length
+      do xLabels.remove
+      delete xLabels
+      xLabels = do @paper.set
+
+    if chartMsg?
+      do chartMsg.remove
+      delete chartMsg
+      chartMsg = do @paper.set
+
+    if blanket?.length
+      do blanket.remove
+      delete blanket
+      blanket = do @paper.set
+    
+    if linepath?
+      do linepath.remove
+      delete linepath
+    
+    if dots?.length
+      do dots.remove
+      delete dots
+
     #set active data
     activeYData = yData.slice start, end
     activeXData = xData.slice start, end
@@ -227,28 +311,30 @@ class global.BGraph
       min = yRange.startPoint
     else
       return self
-    
-    # Remove message
-    if chartMsg?
-      do chartMsg.remove
-      delete chartMsg
-      chartMsg = do r.set
 
     # Draw the grid
     X = (@options.width - leftgutter) / gridRange
     Y = (@options.height - bottomgutter - topgutter) / (max - min)
 
-    drawGrid leftgutter + X * .5, topgutter + .5, @options.width - leftgutter - X, @options.height - topgutter - bottomgutter, gridRange - 1, 8
+    drawGrid @paper, leftgutter + X * .5, topgutter + .5, @options.width - leftgutter - X, @options.height - topgutter - bottomgutter, gridRange - 1, 8
 
     # Create X-Axis labels from date array
     labels = _.map activeXData, (date) -> do date.getDate + "-" + months[do date.getMonth]
 
     #draw labels
-    drawLabels leftgutter + X * .5, topgutter + .5, @options.height - topgutter - bottomgutter, 8, yRange
+    drawLabels @paper, leftgutter + X * .5, topgutter + .5, @options.height - topgutter - bottomgutter, 8, yRange
     
     #draw chart
-    linepath = do r.path
+    linepath = do @paper.path
+    dots = do @paper.set
     linepath.attr lineAttr
+
+    #set event functions
+    if not @events.hover.overFn
+      {overFn, outFn} = do @defaultHoverFns
+      @events.hover.overFn = overFn
+      @events.hover.outFn = outFn
+    
     for i in [0...gridRange]
       y = @options.height - bottomgutter - Y * (activeYData[i] - min)
       x = Math.round leftgutter + X * (i + .5)
@@ -261,12 +347,12 @@ class global.BGraph
         X2 = Math.round leftgutter + X * (i + 1.5)
         a = getAnchors X0, Y0, x, y, X2, Y2
         p = p.concat [a.x1, a.y1, x, y, a.x2, a.y2]
-      dots.push r.circle(x, y, 4).attr dotAttr
-      xLabels.push (r.text x, @options.height - 25, labels[i]).attr(txt).toBack().rotate 90
-      blanket.push (r.rect leftgutter + X * i, 0, X, @options.height - bottomgutter).attr blanketAttr
+      dots.push @paper.circle(x, y, 4).attr dotAttr
+      xLabels.push (@paper.text x, @options.height - 25, labels[i]).attr(txt).toBack().rotate 90
+      blanket.push (@paper.rect leftgutter + X * i, 0, X, @options.height - bottomgutter).attr blanketAttr
       rect = blanket[blanket.length - 1]
-      if events.hover?.overFn? and events.hover?.outFn?
-        attachHover.call @, rect, blanket.length - 1, events.hover.overFn, events.hover.outFn
+      
+      attachHover.call @, rect, blanket.length - 1, @events.hover.overFn, @events.hover.outFn, activeXData, activeYData
 
     p = p.concat [x, y, x, y]
     linepath.attr path: p

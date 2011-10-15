@@ -1,12 +1,15 @@
-loadGraph = new BGraph holder: "chartcontent", height: 500, type: "l"
+window.loadGraph = new BGraph holder: "chartcontent", height: 500, type: "l"
 loadGraph.setMessage "Loading..."
 
-dateDiff = (a, b) ->
-  aArray = a.date.split "-"
-  bArray = b.date.split "-"
-  aDate = new Date aArray[0], aArray[1] - 1, aArray[2]
-  bDate = new Date bArray[0], bArray[1] - 1, bArray[2]
-  aDate - bDate
+prepareData = (rawData, dateField) ->
+  dateDiff = (a, b) ->
+    aArray = a[dateField].split "-"
+    bArray = b[dateField].split "-"
+    aDate = new Date aArray[0], aArray[1] - 1, aArray[2]
+    bDate = new Date bArray[0], bArray[1] - 1, bArray[2]
+    aDate - bDate
+  
+  sortedData = rawData.sort dateDiff
 
 $.getJSON '/tools/fiidii/serverscripts/fiidii.php', (response) ->
   txt         =
@@ -17,8 +20,37 @@ $.getJSON '/tools/fiidii/serverscripts/fiidii.php', (response) ->
     fill         : "#666"
   months         =  ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
   
-  sortedCurr = response.curr.sort dateDiff
-  loadGraph.setData sortedCurr, "bb_date", "usd"
+  window.response = response
+  sortedCurr = prepareData response.c, "x"
+  loadGraph.setData sortedCurr, "x", "u"
+
+  #Load currency values
+  latestRates = sortedCurr.slice(-1)[0]
+  ($ "#usd").html latestRates.u
+  ($ "#gbp").html latestRates.g
+  ($ "#euro").html latestRates.e
+  ($ "#yen").html latestRates.y
+
+  ($ "#fiibuy").html response.fb
+  ($ "#fiisell").html response.fs
+  fiinet = ((response.fb * 100 - response.fs * 100) / 100)
+  ($ "#fiinet").html fiinet
+  if fiinet < 0 then ($ "#fiinet").addClass "red"
+
+  ($ "#diibuy").html response.db
+  ($ "#diisell").html response.ds
+  diinet = ((response.db * 100 - response.ds * 100) / 100)
+  ($ "#diinet").html diinet
+  if diinet < 0 then ($ "#diinet").addClass "red"
+
+  fiidiibuy = (response.fb * 100 + response.db * 100) / 100
+  fiidiisell = (response.fs * 100 + response.ds * 100) / 100
+  ($ "#fiidiibuy").html fiidiibuy
+  ($ "#fiidiisell").html fiidiisell
+  fiidiinet = (((fiidiibuy * 100) - (fiidiisell * 100)) / 100)
+  ($ "#fiidiinet").html fiidiinet
+  if fiidiinet < 0 then ($ "#fiidiinet").addClass "red"
+  
   r = loadGraph.paper
   label = do r.set
   label_visible = false
@@ -27,9 +59,8 @@ $.getJSON '/tools/fiidii/serverscripts/fiidii.php', (response) ->
   label.push (r.text 60, 27, "date").attr txt1
   do label.hide
   frame = (r.popup 100, 100, label, "right").attr(fill: "#F9FAFC", stroke: "#DBDCDE", "stroke-width": 1, "fill-opacity": 1).hide()
-
+  ###
   loadGraph.hover (rect, dot, data, date) ->
-    rect.attr opacity: 0.04
     clearTimeout leave_timer
     label[0].attr text: data + " " + "thousand crore Rs."
     label[1].attr text: do date.getDate + "-" + months[do date.getMonth]
@@ -48,13 +79,12 @@ $.getJSON '/tools/fiidii/serverscripts/fiidii.php', (response) ->
     do label.toFront
     
   ,(rect, dot, data, date) ->
-    rect.attr opacity: 0
     dot.attr "r", 4
     leave_timer = setTimeout ->
       do frame.hide
-      do label.hide
+      do label[0].hide
+      do label[1].hide
       label_visible = false
     , 1
-          
-  loadGraph.draw 0, 25
-  
+   ###       
+  loadGraph.draw -25
