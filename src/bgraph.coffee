@@ -56,7 +56,7 @@ class global.BGraph
     @events        =  hover :
                         overFn : null
                         outFn  : null
-    @popup         =  yFormat :  "", xFormat : ""
+    @popup         =  yFormat :  '#{y}', xFormat : '#{x}'
     #get data from options.
     if options.data
       loadData options.data, options.type, options.xname, options.yname
@@ -157,15 +157,26 @@ class global.BGraph
     label_visible = false
     leave_timer = 0
     r = @paper
+    yLegend = @popup.yFormat
+    xLegend = @popup.xFormat
+
     label.push (@paper.text 60, 12, "").attr txtLY
     label.push (@paper.text 60, 27, "").attr txtLX
     do label.hide
     frame = (@paper.popup 100, 100, label, "right").attr(frameAttr).hide()
 
+    getLabelText = (formatStr, x, y) ->
+      yLArray = formatStr.split '#{y}'
+      yReplaced = yLArray.join y
+
+      xLArray = yReplaced.split '#{x}'
+      xReplaced = xLArray.join x
+
     overFn = (rect, dot, data, date) ->
       clearTimeout leave_timer
-      label[0].attr text: data + " thousand crore Rs."
-      label[1].attr text: do date.getDate + "-" + months[do date.getMonth] + "-" + date.getFullYear()
+      dateStr = do date.getDate + "-" + months[do date.getMonth] + "-" + date.getFullYear()
+      label[0].attr text: getLabelText yLegend, dateStr, data
+      label[1].attr text: getLabelText xLegend, dateStr, data
       side = "right"
       side = "left"  if (dot.attr "cx") + frame.getBBox().width > r.width
       ppp = @paper.popup (dot.attr "cx"), (dot.attr "cy"), label, side, 1
@@ -221,9 +232,9 @@ class global.BGraph
     @
 
   # Public method: set the labels for default popup
-  setHoverLabels: (yL, xL) ->
-    if yL then @popup.yFormat = yL
-    if xL then @popup.xFormat = xL
+  setHoverLabels: (xL = '#{x}', yL = '#{y}') ->
+    @popup.xFormat = xL
+    @popup.yFormat = yL
     @
        
   toString: ->
