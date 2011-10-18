@@ -35,7 +35,7 @@
 			"file": "src/bgraph.coffee",
 			"settings":
 			{
-				"buffer_size": 12017,
+				"buffer_size": 12801,
 				"line_ending": "Unix"
 			}
 		},
@@ -43,7 +43,7 @@
 			"file": "src/script.coffee",
 			"settings":
 			{
-				"buffer_size": 3283,
+				"buffer_size": 2270,
 				"line_ending": "Unix"
 			}
 		},
@@ -51,7 +51,7 @@
 			"file": "lib/bgraph.js",
 			"settings":
 			{
-				"buffer_size": 13532,
+				"buffer_size": 14658,
 				"line_ending": "Unix"
 			}
 		},
@@ -67,7 +67,7 @@
 			"file": "lib/script.js",
 			"settings":
 			{
-				"buffer_size": 3907,
+				"buffer_size": 2820,
 				"line_ending": "Unix"
 			}
 		},
@@ -167,6 +167,15 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"type",
+			"xData",
+			"yData",
+			"linepath",
+			"chartMsg",
+			"blanket",
+			"dots",
+			"xLabels",
+			"yLabels",
 			"drawLabels",
 			"yLabels",
 			"r",
@@ -280,15 +289,15 @@
 					"file": "src/bgraph.coffee",
 					"settings":
 					{
-						"buffer_size": 12017,
+						"buffer_size": 12801,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								11440,
-								11440
+								5077,
+								5077
 							]
 						],
 						"settings":
@@ -298,7 +307,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2896.0,
+						"translation.y": 1776.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -308,15 +317,15 @@
 					"file": "src/script.coffee",
 					"settings":
 					{
-						"buffer_size": 3283,
+						"buffer_size": 2270,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2629,
-								2629
+								1652,
+								1652
 							]
 						],
 						"settings":
@@ -326,7 +335,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 48.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -336,7 +345,7 @@
 					"file": "lib/bgraph.js",
 					"settings":
 					{
-						"buffer_size": 13532,
+						"buffer_size": 14658,
 						"regions":
 						{
 						},
@@ -354,7 +363,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 204.0,
+						"translation.y": 432.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -390,7 +399,7 @@
 					"file": "lib/script.js",
 					"settings":
 					{
-						"buffer_size": 3907,
+						"buffer_size": 2820,
 						"regions":
 						{
 						},
@@ -408,7 +417,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 624.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"

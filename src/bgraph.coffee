@@ -290,8 +290,12 @@ class global.BGraph
     @chartOptions.blanket = do @paper.set
 
     #set active data
-    activeYData = @chartData.yData.slice start, end
-    activeXData = @chartData.xData.slice start, end
+    if end?
+      activeYData = @chartData.yData.slice start, end
+      activeXData = @chartData.xData.slice start, end
+    else
+      activeYData = @chartData.yData.slice start
+      activeXData = @chartData.xData.slice start
 
     gridRange = activeYData.length
     if not gridRange
