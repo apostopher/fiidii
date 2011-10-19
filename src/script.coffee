@@ -54,6 +54,8 @@ $.getJSON '/tools/fiidii/serverscripts/fiidii.php', (response) ->
   ($ "#fiidiinet").html fiidiinet
   if fiidiinet < 0 then ($ "#fiidiinet").addClass "red"
   
+  ($ "#tdspan").html response.t
+  
   r = loadGraph.paper
   label = do r.set
   label_visible = false

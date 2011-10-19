@@ -11,7 +11,7 @@
 			"file": "sass/screen.sass",
 			"settings":
 			{
-				"buffer_size": 4909,
+				"buffer_size": 4966,
 				"line_ending": "Unix"
 			}
 		},
@@ -27,7 +27,7 @@
 			"file": "stylesheets/screen.css",
 			"settings":
 			{
-				"buffer_size": 5029,
+				"buffer_size": 5069,
 				"line_ending": "Unix"
 			}
 		},
@@ -35,7 +35,7 @@
 			"file": "src/bgraph.coffee",
 			"settings":
 			{
-				"buffer_size": 12801,
+				"buffer_size": 12924,
 				"line_ending": "Unix"
 			}
 		},
@@ -43,7 +43,7 @@
 			"file": "src/script.coffee",
 			"settings":
 			{
-				"buffer_size": 2270,
+				"buffer_size": 2305,
 				"line_ending": "Unix"
 			}
 		},
@@ -51,7 +51,7 @@
 			"file": "lib/bgraph.js",
 			"settings":
 			{
-				"buffer_size": 14658,
+				"buffer_size": 14914,
 				"line_ending": "Unix"
 			}
 		},
@@ -67,7 +67,7 @@
 			"file": "lib/script.js",
 			"settings":
 			{
-				"buffer_size": 2820,
+				"buffer_size": 2834,
 				"line_ending": "Unix"
 			}
 		},
@@ -201,7 +201,6 @@
 	"groups":
 	[
 		{
-			"selected": 3,
 			"sheets":
 			[
 				{
@@ -209,15 +208,15 @@
 					"file": "sass/screen.sass",
 					"settings":
 					{
-						"buffer_size": 4909,
+						"buffer_size": 4966,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2681,
-								2681
+								3872,
+								3872
 							]
 						],
 						"settings":
@@ -227,7 +226,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1296.0,
+						"translation.y": 2512.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -244,8 +243,8 @@
 						"selection":
 						[
 							[
-								247,
-								247
+								124,
+								140
 							]
 						],
 						"settings":
@@ -263,15 +262,15 @@
 					"file": "stylesheets/screen.css",
 					"settings":
 					{
-						"buffer_size": 5029,
+						"buffer_size": 5069,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								612,
-								612
+								3148,
+								3148
 							]
 						],
 						"settings":
@@ -279,7 +278,7 @@
 							"syntax": "Packages/CSS/CSS.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 624.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -289,15 +288,15 @@
 					"file": "src/bgraph.coffee",
 					"settings":
 					{
-						"buffer_size": 12801,
+						"buffer_size": 12924,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								5077,
-								5077
+								10178,
+								10178
 							]
 						],
 						"settings":
@@ -307,7 +306,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1776.0,
+						"translation.y": 4080.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -317,15 +316,15 @@
 					"file": "src/script.coffee",
 					"settings":
 					{
-						"buffer_size": 2270,
+						"buffer_size": 2305,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1652,
-								1652
+								1906,
+								1906
 							]
 						],
 						"settings":
@@ -335,7 +334,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 48.0,
+						"translation.y": 352.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -345,15 +344,15 @@
 					"file": "lib/bgraph.js",
 					"settings":
 					{
-						"buffer_size": 14658,
+						"buffer_size": 14914,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								11587,
+								11587
 							]
 						],
 						"settings":
@@ -363,7 +362,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 432.0,
+						"translation.y": 4992.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -399,7 +398,7 @@
 					"file": "lib/script.js",
 					"settings":
 					{
-						"buffer_size": 2820,
+						"buffer_size": 2834,
 						"regions":
 						{
 						},
