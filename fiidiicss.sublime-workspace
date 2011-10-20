@@ -35,7 +35,7 @@
 			"file": "src/bgraph.coffee",
 			"settings":
 			{
-				"buffer_size": 12924,
+				"buffer_size": 12998,
 				"line_ending": "Unix"
 			}
 		},
@@ -51,15 +51,7 @@
 			"file": "lib/bgraph.js",
 			"settings":
 			{
-				"buffer_size": 14914,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/home/rahul/Downloads/BankWise.csv",
-			"settings":
-			{
-				"buffer_size": 0,
+				"buffer_size": 15054,
 				"line_ending": "Unix"
 			}
 		},
@@ -67,15 +59,7 @@
 			"file": "lib/script.js",
 			"settings":
 			{
-				"buffer_size": 2834,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "(function (x, y, data, lbl, dot) {\n            var timer, i = 0;\n            rect.hover(function () {\n                clearTimeout(leave_timer);\n                var side = \"right\";\n                if (x + frame.getBBox().width > width) {\n                    side = \"left\";\n                }\n                var ppp = r.popup(x, y, label, side, 1),\n                    anim = Raphael.animation({\n                        path: ppp.path,\n                        transform: [\"t\", ppp.dx, ppp.dy]\n                    }, 200 * is_label_visible);\n                lx = label[0].transform()[0][1] + ppp.dx;\n                ly = label[0].transform()[0][2] + ppp.dy;\n                frame.show().stop().animate(anim);\n                label[0].attr({text: data + \" hit\" + (data == 1 ? \"\" : \"s\")}).show().stop().animateWith(frame, anim, {transform: [\"t\", lx, ly]}, 200 * is_label_visible);\n                label[1].attr({text: lbl + \" September 2008\"}).show().stop().animateWith(frame, anim, {transform: [\"t\", lx, ly]}, 200 * is_label_visible);\n                dot.attr(\"r\", 6);\n                is_label_visible = true;\n            }, function () {\n                dot.attr(\"r\", 4);\n                leave_timer = setTimeout(function () {\n                    frame.hide();\n                    label[0].hide();\n                    label[1].hide();\n                    is_label_visible = false;\n                }, 1);\n            });\n        })(x, y, data[i], labels[i], dot);",
-			"settings":
-			{
-				"buffer_size": 1460,
+				"buffer_size": 2871,
 				"line_ending": "Unix"
 			}
 		}
@@ -83,11 +67,27 @@
 	"build_system": "",
 	"command_palette":
 	{
-		"height": 0.0,
+		"height": 259.0,
 		"selected_items":
 		[
+			[
+				"Package Control: ",
+				"Package Control: Install Package"
+			],
+			[
+				"pa",
+				"Package Control: Install Package"
+			],
+			[
+				"",
+				"Package Control: Install Package"
+			],
+			[
+				"p",
+				"Package Control: Install Package"
+			]
 		],
-		"width": 0.0
+		"width": 467.0
 	},
 	"console":
 	{
@@ -104,9 +104,10 @@
 	},
 	"file_history":
 	[
+		"/home/rahul/Downloads/BankWise.csv",
+		"/home/rahul/Downloads/python-suds-0.4/README",
 		"/home/rahul/school/fiidiicss/src/script.coffee",
 		"/media/C/AXS/TouchAXS/src/com/AXS/net/ConnectionThread.java",
-		"/home/rahul/Downloads/BankWise.csv",
 		"/home/rahul/school/fiidiicss/src/bgraph.coffee",
 		"/home/rahul/school/fiidiicss/bgraphorig.coffee",
 		"/home/rahul/school/fiidiicss/scriptorig.coffee",
@@ -167,6 +168,7 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"chartOptions",
 			"type",
 			"xData",
 			"yData",
@@ -189,6 +191,7 @@
 		"regex": false,
 		"replace_history":
 		[
+			"chartProps",
 			"",
 			"yData"
 		],
@@ -201,6 +204,7 @@
 	"groups":
 	[
 		{
+			"selected": 6,
 			"sheets":
 			[
 				{
@@ -226,7 +230,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2512.0,
+						"translation.y": 176.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -278,7 +282,7 @@
 							"syntax": "Packages/CSS/CSS.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 624.0,
+						"translation.y": 16.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -288,15 +292,15 @@
 					"file": "src/bgraph.coffee",
 					"settings":
 					{
-						"buffer_size": 12924,
+						"buffer_size": 12998,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								10178,
-								10178
+								10773,
+								10773
 							]
 						],
 						"settings":
@@ -306,7 +310,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 4080.0,
+						"translation.y": 4608.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -334,7 +338,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 352.0,
+						"translation.y": 16.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -344,15 +348,15 @@
 					"file": "lib/bgraph.js",
 					"settings":
 					{
-						"buffer_size": 14914,
+						"buffer_size": 15054,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								11587,
-								11587
+								0,
+								0
 							]
 						],
 						"settings":
@@ -362,84 +366,31 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 4992.0,
+						"translation.y": 768.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 6,
-					"file": "/home/rahul/Downloads/BankWise.csv",
-					"settings":
-					{
-						"buffer_size": 0,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Text/Plain text.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 3648.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 7,
 					"file": "lib/script.js",
 					"settings":
 					{
-						"buffer_size": 2834,
+						"buffer_size": 2871,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								384,
+								384
 							]
 						],
 						"settings":
 						{
 							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
 							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 624.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 8,
-					"settings":
-					{
-						"buffer_size": 1460,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								392,
-								392
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Text/Plain text.tmLanguage",
-							"tab_size": 4,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,

@@ -40,7 +40,7 @@ class global.BGraph
     @paper = Raphael options.holder, options.width, options.height
 
     # These are the chart variables which depend on @paper
-    @chartOptions  =
+    @chartProps  =
       yLabels      :  null
       xLabels      :  null
       chartMsg     :  null
@@ -63,6 +63,7 @@ class global.BGraph
   
   # Private method: This method draws the graph grid.
   drawGrid = (r, x, y, w, h, wv, hv) ->
+    grid = do r.set
     gridPath = []
     axisPath = []
     rowHeight = h / hv
@@ -76,10 +77,17 @@ class global.BGraph
     
     axisPath = axisPath.concat ["M", xRound + .5, Math.round(y + hv * rowHeight) + .5, "H", Math.round(x + w) + .5]
     axisPath = axisPath.concat ["M", Math.round(x) + .5, Math.round(y) + .5, "V", Math.round(y + h) + .5]
+    
+    hLines = r.path gridPath.join ","
+    hLines.attr stroke: "#eee"
 
-    (r.path gridPath.join ",").attr stroke: "#eee"
-    (r.path axisPath.join ",").attr stroke: "#ccc"
-  
+    axis = r.path axisPath.join ","
+    axis.attr stroke: "#ccc"
+
+    grid.push axis
+    grid.push hLines
+    grid
+
   # Private method: This method draws the Y-axis labels.
   drawYLabels = (r, x, y, h, hv, yRange) ->
     xRound = Math.round x
@@ -228,8 +236,8 @@ class global.BGraph
   hover: (overFn, outFn) ->
     # check whether event object has hover
     @events.hover = {overFn, outFn}
-    if @chartOptions.blanket.length isnt 0
-      for rect, index in @chartOptions.blanket
+    if @chartProps.blanket.length isnt 0
+      for rect, index in @chartProps.blanket
         attachHover.call @, rect, index, overFn, outFn
     @
 
@@ -254,13 +262,13 @@ class global.BGraph
       opacity      : 0
 
     # chartMsg is a set of messages. Can hold multiple messages
-    do @chartOptions.chartMsg?.remove
-    delete @chartOptions.chartMsg
-    @chartOptions.chartMsg = do @paper.set
+    do @chartProps.chartMsg?.remove
+    delete @chartProps.chartMsg
+    @chartProps.chartMsg = do @paper.set
     msg = (@paper.text @options.width / 2, @options.height / 2, message).attr (style ? txtMsg)
 
     # add message to chartMsg
-    @chartOptions.chartMsg.push msg
+    @chartProps.chartMsg.push msg
     msg.animate {opacity: 1}, 200
     @
 
@@ -271,23 +279,23 @@ class global.BGraph
     p = []
     
     # clear the stage
-    if @chartOptions.yLabels?.length
-      do @chartOptions.yLabels.remove
-      delete @chartOptions.yLabels
+    if @chartProps.yLabels?.length
+      do @chartProps.yLabels.remove
+      delete @chartProps.yLabels
 
-    if @chartOptions.xLabels?.length
-      do @chartOptions.xLabels.remove
-      delete @chartOptions.xLabels 
-    @chartOptions.xLabels = do @paper.set
+    if @chartProps.xLabels?.length
+      do @chartProps.xLabels.remove
+      delete @chartProps.xLabels 
+    @chartProps.xLabels = do @paper.set
       
-    if @chartOptions.chartMsg?
-      do @chartOptions.chartMsg.remove
-      delete @chartOptions.chartMsg
+    if @chartProps.chartMsg?
+      do @chartProps.chartMsg.remove
+      delete @chartProps.chartMsg
 
-    if @chartOptions.blanket?.length
-      do @chartOptions.blanket.remove
-      delete @chartOptions.blanket
-    @chartOptions.blanket = do @paper.set
+    if @chartProps.blanket?.length
+      do @chartProps.blanket.remove
+      delete @chartProps.blanket
+    @chartProps.blanket = do @paper.set
 
     #set active data
     if end?
@@ -317,27 +325,28 @@ class global.BGraph
     X = (@options.width - leftgutter) / gridRange
     Y = (@options.height - bottomgutter - topgutter) / (max - min)
 
-    drawGrid @paper, leftgutter + X * .5, topgutter + .5, @options.width - leftgutter - X, @options.height - topgutter - bottomgutter, gridRange - 1, 8
+    if not @chartProps.grid
+      @chartProps.grid = drawGrid @paper, leftgutter + X * .5, topgutter + .5, @options.width - leftgutter - X, @options.height - topgutter - bottomgutter, gridRange - 1, 8
 
-    if @chartOptions.linepath?
-      do @chartOptions.linepath.remove
-      delete @chartOptions.linepath
-    @chartOptions.linepath = do @paper.path
+    if @chartProps.linepath?
+      do @chartProps.linepath.remove
+      delete @chartProps.linepath
+    @chartProps.linepath = do @paper.path
       
 
-    if @chartOptions.dots?.length
-      do @chartOptions.dots.remove
-      delete @chartOptions.dots
-    @chartOptions.dots = do @paper.set
+    if @chartProps.dots?.length
+      do @chartProps.dots.remove
+      delete @chartProps.dots
+    @chartProps.dots = do @paper.set
 
     # Create X-Axis labels from date array
     labels = _.map activeXData, (date) -> do date.getDate + "-" + months[do date.getMonth]
 
     #draw labels
-    @chartOptions.yLabels = drawYLabels @paper, leftgutter + X * .5, topgutter + .5, @options.height - topgutter - bottomgutter, 8, yRange
+    @chartProps.yLabels = drawYLabels @paper, leftgutter + X * .5, topgutter + .5, @options.height - topgutter - bottomgutter, 8, yRange
     
     #draw chart
-    @chartOptions.linepath.attr lineAttr
+    @chartProps.linepath.attr lineAttr
 
     #set event functions
     if not @events.hover.overFn
@@ -357,15 +366,15 @@ class global.BGraph
         X2 = Math.round leftgutter + X * (i + 1.5)
         a = getAnchors X0, Y0, x, y, X2, Y2
         p = p.concat [a.x1, a.y1, x, y, a.x2, a.y2]
-      @chartOptions.dots.push @paper.circle(x, y, 4).attr dotAttr
-      @chartOptions.xLabels.push (@paper.text x, @options.height - 25, labels[i]).attr(txt).toBack().rotate 90
-      @chartOptions.blanket.push (@paper.rect leftgutter + X * i, 0, X, @options.height - bottomgutter).attr blanketAttr
-      blanketLength = @chartOptions.blanket.length
-      rect = @chartOptions.blanket[blanketLength - 1]
+      @chartProps.dots.push @paper.circle(x, y, 4).attr dotAttr
+      @chartProps.xLabels.push (@paper.text x, @options.height - 25, labels[i]).attr(txt).toBack().rotate 90
+      @chartProps.blanket.push (@paper.rect leftgutter + X * i, 0, X, @options.height - bottomgutter).attr blanketAttr
+      blanketLength = @chartProps.blanket.length
+      rect = @chartProps.blanket[blanketLength - 1]
       
-      attachHover.call @, rect, blanketLength - 1, @events.hover.overFn, @events.hover.outFn, @chartOptions.dots, @chartOptions.blanket, activeXData, activeYData
+      attachHover.call @, rect, blanketLength - 1, @events.hover.overFn, @events.hover.outFn, @chartProps.dots, @chartProps.blanket, activeXData, activeYData
 
     p = p.concat [x, y, x, y]
-    @chartOptions.linepath.attr path: p
-    do @chartOptions.blanket.toFront
+    @chartProps.linepath.attr path: p
+    do @chartProps.blanket.toFront
     @
