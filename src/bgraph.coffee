@@ -6,6 +6,7 @@ class global.BGraph
   leftgutter     =  30
   topgutter      =  20
   bottomgutter   =  50
+  rightgutter    =  30
   months         =  ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
   txtY           =
       font       :  '11px Helvetica, Arial'
@@ -15,11 +16,23 @@ class global.BGraph
       stroke            : "#3C60A4"
       "stroke-width"    : 3
       "stroke-linejoin" : "round"
+
+  sLineAttr   =
+      stroke            : "#ddd"
+      "stroke-width"    : 2
+      "stroke-linejoin" : "round"
+
   dotAttr     =
       fill           : "#fff"
       stroke         : "#3C60A4"
       "stroke-width" : 2
-  blanketAttr =
+  
+  sDotAttr     =
+      fill           : "#fff"
+      stroke         : "#ddd"
+      "stroke-width" : 2
+
+  pBlanketAttr =
       stroke       : "none"
       fill         : "#fff"
       opacity      : 0
@@ -30,15 +43,23 @@ class global.BGraph
   txtLY       =
     font         : '12px Helvetica, Arial', "font-weight": "bold"
     fill         : "#3C60A4"
+  
+  txtSLY      =
+    font         : '12px Helvetica, Arial', "font-weight": "bold"
+    fill         : "#999"
 
   txtLX       =
     font         : '10px Helvetica, Arial'
     fill         : "#666"
+  
+  txtSLX       =
+    font         : '10px Helvetica, Arial'
+    fill         : "#999"
 
   bpAttr      =
     "stroke-opacity" : "0.000001"
     stroke           : "#FFF"
-    "stroke-width"   : "24"
+    "stroke-width"   : "30"
 
   constructor: (@options) ->
 
@@ -47,28 +68,34 @@ class global.BGraph
 
     # These are the chart variables which depend on @paper
     @chartProps  =
-      yLabels      :  null
+      primaryYLabels      :  null
       xLabels      :  null
       chartMsg     :  null
-      blanket      :  null
-      dots         :  null
-      linepath     :  null
+      pBlanket      :  null
+      pDots         :  null
+      primaryPath     :  null
     
     @chartData     =
-      yData        :  []
+      primaryYData        :  []
       xData        :  []
 
     # Events object
     @events        =  hover :
                         overFn : null
                         outFn  : null
+                      sHover:
+                        overFn : null
+                        outFn  : null
+
     @popup         =  yFormat :  '#{y}', xFormat : '#{x}'
+    @sPopup        =  yFormat :  '#{y}', xFormat : '#{x}'
+
     #get data from options.
     if options.data
       loadData options.data, options.type, options.xname, options.yname
   
   # Private method: This method draws the graph grid.
-  drawGrid = (r, x, y, w, h, wv, hv) ->
+  drawGrid = (r, x, y, w, h, wv, hv, secondaryDrawn = false) ->
     grid = do r.set
     gridPath = []
     axisPath = []
@@ -83,6 +110,8 @@ class global.BGraph
     
     axisPath = axisPath.concat ["M", xRound + .5, Math.round(y + hv * rowHeight) + .5, "H", Math.round(x + w) + .5]
     axisPath = axisPath.concat ["M", Math.round(x) + .5, Math.round(y) + .5, "V", Math.round(y + h) + .5]
+    if secondaryDrawn
+      axisPath = axisPath.concat ["M", Math.round(x + w) + .5, Math.round(y) + .5, "V", Math.round(y + h) + .5]
     
     hLines = r.path gridPath.join ","
     hLines.attr stroke: "#eee"
@@ -92,21 +121,22 @@ class global.BGraph
 
     grid.push axis
     grid.push hLines
+    do grid.toBack
     grid
 
   # Private method: This method draws the Y-axis labels.
   drawYLabels = (r, x, y, h, hv, yRange) ->
     xRound = Math.round x
     rowHeight = h / hv
-    yLabels = do r.set
+    primaryYLabels = do r.set
     for i in [0..hv]
       yStep = (yRange.endPoint - (i * yRange.step)).toFixed 2
       yLabel = r.text 0, Math.round(y + i * rowHeight) + .5, yStep
       yWidth = yWidth || yLabel.getBBox().width
       txtY.x = xRound - yWidth - 5
       yLabel.attr(txtY).toBack()
-      yLabels.push yLabel
-    yLabels
+      primaryYLabels.push yLabel
+    primaryYLabels
 
   # Private method: This method calculates the min and max Y values and step size
   # for Y labels. This method must be called after every update in order to
@@ -157,29 +187,38 @@ class global.BGraph
 
   # Private method: This method is used by hover and redraw functions
   # This is created as per DRY. as two functions need same functionality
-  attachHover = (rect, index, overFn, outFn, dots, blanket, activeXData, activeYData) ->
+  attachHover = (rect, index, overFn, outFn, pDots, pBlanket, activeXData, activePrimaryYData) ->
     rect.hover ->
-      overFn.call @, rect, dots[index], activeYData[index], activeXData[index]
-      do blanket.toFront
+      overFn.call @, rect, pDots[index], activePrimaryYData[index], activeXData[index]
+      do pBlanket.toFront
       true
     , ->
-      outFn.call @, rect, dots[index], activeYData[index], activeXData[index]
-      do blanket.toFront
+      outFn.call @, rect, pDots[index], activePrimaryYData[index], activeXData[index]
+      do pBlanket.toFront
       true
     true
   
   # Public method: default over function
-  defaultHoverFns: () ->
-    frameAttr = fill: "#F9FAFC", stroke: "#DBDCDE", "stroke-width": 1, "fill-opacity": 1
+  defaultHoverFns: (primary = true) ->
     label = do @paper.set
     label_visible = false
     leave_timer = 0
     r = @paper
-    yLegend = @popup.yFormat
-    xLegend = @popup.xFormat
+    if primary
+      frameAttr = fill: "#F9FAFC", stroke: "#DBDCDE", "stroke-width": 1, "fill-opacity": 1
+      yLegend = @popup.yFormat
+      xLegend = @popup.xFormat
+      txtX = txtLX
+      txtY = txtLY
+    else
+      frameAttr = fill: "#F9F9F9", stroke: "#DDD", "stroke-width": 1, "fill-opacity": 1
+      yLegend = @sPopup.yFormat
+      xLegend = @sPopup.xFormat
+      txtX = txtSLX
+      txtY = txtSLY
 
-    label.push (@paper.text 60, 12, "").attr txtLY
-    label.push (@paper.text 60, 27, "").attr txtLX
+    label.push (@paper.text 60, 12, "").attr txtY
+    label.push (@paper.text 60, 27, "").attr txtX
     do label.hide
     frame = (@paper.popup 100, 100, label, "right").attr(frameAttr).hide()
 
@@ -219,6 +258,13 @@ class global.BGraph
       , 1
 
     {overFn, outFn}
+  
+  # Public methos: Set secondary data.
+  setSecondaryData: (data, yname = "y") ->
+    @options.sData = data
+    @options.sYName = yname
+    @chartData.secondaryYData = _.map data, (dataItem) -> +dataItem[yname] || 0
+    @
 
   # Public method: set the chart data. This is useful when chart data is received
   # in AJAX request. The loading message can be displayed till the data is received.
@@ -227,7 +273,7 @@ class global.BGraph
     @options.xname = xname
     @options.yname = yname
     
-    @chartData.yData = _.map data, (dataItem) -> +dataItem[yname] || 0
+    @chartData.primaryYData = _.map data, (dataItem) -> +dataItem[yname] || 0
     if @options.type is "l"
       # Accept dates as string and create date objects from it.
       @chartData.xData = _.map data, (dataItem) ->
@@ -237,15 +283,15 @@ class global.BGraph
       @chartData.xData = _.map data, (dataItem) -> dataItem.x
     @
 
-  # Public method: attach user-specific hover event handlers to blanket elements.
+  # Public method: attach user-specific hover event handlers to pBlanket elements.
   # If this is called before draw, it just stores the event handlers
-  # If this is called after draw, it will loop over blanket elements and update
+  # If this is called after draw, it will loop over pBlanket elements and update
   # hover event handlers
   hover: (overFn, outFn) ->
     # check whether event object has hover
     @events.hover = {overFn, outFn}
-    if @chartProps.blanket.length isnt 0
-      for rect, index in @chartProps.blanket
+    if @chartProps.pBlanket.length isnt 0
+      for rect, index in @chartProps.pBlanket
         attachHover.call @, rect, index, overFn, outFn
     @
 
@@ -253,6 +299,12 @@ class global.BGraph
   setHoverLabels: (xL = '#{x}', yL = '#{y}') ->
     @popup.xFormat = xL
     @popup.yFormat = yL
+    @
+  
+  # Public method: set the labels for secondary popup
+  setSecondaryHoverLabels: (xL = '#{x}', yL = '#{y}') ->
+    @sPopup.xFormat = xL
+    @sPopup.yFormat = yL
     @
        
   toString: ->
@@ -279,17 +331,131 @@ class global.BGraph
     @chartProps.chartMsg.push msg
     msg.animate {opacity: 1}, 200
     @
+  
+  #Private method: Draw the secondary line chart. The x-axis labels are shared.
+  drawSecondary = (selfRef, activeXData, start = 0, end) ->
+    s = []
+    if not selfRef.chartData.secondaryYData then return false
+    # clear the stage
+    if selfRef.chartProps.secondaryYLabels?.length
+      do selfRef.chartProps.secondaryYLabels.remove
+      delete selfRef.chartProps.secondaryYLabels
+    
+    if selfRef.chartProps.sBlanket?.length
+      do selfRef.chartProps.sBlanket.remove
+      delete selfRef.chartProps.sBlanket
+    selfRef.chartProps.sBlanket = do selfRef.paper.set
+    
+    #set active data
+    if end?
+      activeSecondaryYData = selfRef.chartData.secondaryYData.slice start, end
+    else
+      activeSecondaryYData = selfRef.chartData.secondaryYData.slice start
+    
+    gridRange = activeSecondaryYData.length
+    if not gridRange then return false
+    
+    # Get max and min of chart data
+    max = Math.max activeSecondaryYData...
+    min = Math.min activeSecondaryYData...
+    
+    yRange = getYRange 8, min, max
+    if yRange?
+      max = yRange.endPoint
+      min = yRange.startPoint
+    else
+      return false
+    
+    if selfRef.chartProps.secondaryPath?
+      do selfRef.chartProps.secondaryPath.remove
+      delete selfRef.chartProps.secondaryPath
+    selfRef.chartProps.secondaryPath = do selfRef.paper.path
+
+    if selfRef.chartProps.sDots?.length
+      do selfRef.chartProps.sDots.remove
+      delete selfRef.chartProps.sDots
+    selfRef.chartProps.sDots = do selfRef.paper.set
+    
+    X = (selfRef.options.width - leftgutter - rightgutter) / gridRange
+    Y = (selfRef.options.height - bottomgutter - topgutter) / (max - min)
+
+    #draw labels
+    #selfRef.chartProps.primaryYLabels = drawYLabels selfRef.paper, leftgutter + X * .5, topgutter + .5, selfRef.options.height - topgutter - bottomgutter, 8, yRange
+
+    #draw chart
+    selfRef.chartProps.secondaryPath.attr sLineAttr
+
+    #set event functions
+    if not selfRef.events.sHover.overFn
+      {overFn, outFn} = selfRef.defaultHoverFns false
+      selfRef.events.sHover.overFn = overFn
+      selfRef.events.sHover.outFn = outFn
+    
+    for i in [0...gridRange]
+      oldX = x
+      oldY = y
+      y = selfRef.options.height - bottomgutter - Y * (activeSecondaryYData[i] - min)
+      x = Math.round leftgutter + X * (i + .5)
+
+      if i is 0
+        s = ["M", x, y, "C", x, y]
+        oldX2 = x
+        oldY2 = y
+        subPathLen = 0
+      if i isnt 0 and i < gridRange
+        Y0 = selfRef.options.height - bottomgutter - Y * (activeSecondaryYData[i - 1] - min)
+        X0 = Math.round leftgutter + X * (i - .5)
+        if activeSecondaryYData[i + 1]
+          Y2 = selfRef.options.height - bottomgutter - Y * (activeSecondaryYData[i + 1] - min)
+          X2 = Math.round leftgutter + X * (i + 1.5)
+        else
+          Y2 = y
+          X2 = x
+        a = getAnchors X0, Y0, x, y, X2, Y2
+        s = s.concat [a.x1, a.y1, x, y, a.x2, a.y2]
+        
+        subPathString = ["M", oldX, oldY, "C", oldX2, oldY2, a.x1, a.y1, x, y].join ","
+        oldSubPathLen = subPathLen
+        subPathLen = Raphael.getTotalLength subPathString
+        pathString = s.join ","
+        pathLen = Raphael.getTotalLength pathString
+        rectPath = Raphael.getSubpath pathString, pathLen - subPathLen - oldSubPathLen / 2, pathLen - subPathLen / 2
+        
+        lineRect = selfRef.paper.path rectPath
+        lineRect.attr bpAttr
+
+        selfRef.chartProps.sBlanket.push lineRect
+        pBlanketLength = selfRef.chartProps.sBlanket.length
+      
+        attachHover.call selfRef, lineRect, pBlanketLength - 1, selfRef.events.sHover.overFn, selfRef.events.sHover.outFn, selfRef.chartProps.sDots, selfRef.chartProps.sBlanket, activeXData, activeSecondaryYData
+
+        oldX2 = a.x2
+        oldY2 = a.y2
+
+      selfRef.chartProps.sDots.push selfRef.paper.circle(x, y, 4).attr sDotAttr
+      
+    rectPath = Raphael.getSubpath pathString, pathLen - subPathLen / 2, pathLen
+    lineRect = selfRef.paper.path rectPath
+    lineRect.attr bpAttr
+
+    selfRef.chartProps.sBlanket.push lineRect
+    pBlanketLength = selfRef.chartProps.sBlanket.length
+    attachHover.call selfRef, lineRect, pBlanketLength - 1, selfRef.events.sHover.overFn, selfRef.events.sHover.outFn, selfRef.chartProps.sDots, selfRef.chartProps.sBlanket, activeXData, activeSecondaryYData
+
+    selfRef.chartProps.secondaryPath.attr path: s
+    do selfRef.chartProps.sBlanket.toFront
+    true
 
   # Public method: This method accepts X and Y values and draws chart.
   # Currently this supports only one chart.
-  draw: (start = 0, end) ->
+  draw: (primaryOnly, start = 0, end) ->
     #private variables
     p = []
     
     # clear the stage
-    if @chartProps.yLabels?.length
-      do @chartProps.yLabels.remove
-      delete @chartProps.yLabels
+    if @chartProps.primaryYLabels?.length
+      do @chartProps.primaryYLabels.remove
+      delete @chartProps.primaryYLabels
 
     if @chartProps.xLabels?.length
       do @chartProps.xLabels.remove
@@ -300,27 +466,27 @@ class global.BGraph
       do @chartProps.chartMsg.remove
       delete @chartProps.chartMsg
 
-    if @chartProps.blanket?.length
-      do @chartProps.blanket.remove
-      delete @chartProps.blanket
-    @chartProps.blanket = do @paper.set
+    if @chartProps.pBlanket?.length
+      do @chartProps.pBlanket.remove
+      delete @chartProps.pBlanket
+    @chartProps.pBlanket = do @paper.set
 
     #set active data
     if end?
-      activeYData = @chartData.yData.slice start, end
+      activePrimaryYData = @chartData.primaryYData.slice start, end
       activeXData = @chartData.xData.slice start, end
     else
-      activeYData = @chartData.yData.slice start
+      activePrimaryYData = @chartData.primaryYData.slice start
       activeXData = @chartData.xData.slice start
 
-    gridRange = activeYData.length
+    gridRange = activePrimaryYData.length
     if not gridRange
       @setMessage "Empty dataset..."
-      return false
+      return @
 
     # Get max and min of chart data
-    max = Math.max activeYData...
-    min = Math.min activeYData...
+    max = Math.max activePrimaryYData...
+    min = Math.min activePrimaryYData...
     
     yRange = getYRange 8, min, max
     if yRange?
@@ -328,32 +494,37 @@ class global.BGraph
       min = yRange.startPoint
     else
       return self
+    
+    # Draw secondary chart first
+    secondaryDrawn = false
+    if not primaryOnly 
+      secondaryDrawn = drawSecondary @, activeXData, start, end
 
     # Draw the grid
-    X = (@options.width - leftgutter) / gridRange
+    X = (@options.width - leftgutter - rightgutter) / gridRange
     Y = (@options.height - bottomgutter - topgutter) / (max - min)
 
     if not @chartProps.grid
-      @chartProps.grid = drawGrid @paper, leftgutter + X * .5, topgutter + .5, @options.width - leftgutter - X, @options.height - topgutter - bottomgutter, gridRange - 1, 8
+      @chartProps.grid = drawGrid @paper, leftgutter + X * .5, topgutter + .5, @options.width - leftgutter - rightgutter - X, @options.height - topgutter - bottomgutter, gridRange - 1, 8, secondaryDrawn
 
-    if @chartProps.linepath?
-      do @chartProps.linepath.remove
-      delete @chartProps.linepath
-    @chartProps.linepath = do @paper.path
+    if @chartProps.primaryPath?
+      do @chartProps.primaryPath.remove
+      delete @chartProps.primaryPath
+    @chartProps.primaryPath = do @paper.path
 
-    if @chartProps.dots?.length
-      do @chartProps.dots.remove
-      delete @chartProps.dots
-    @chartProps.dots = do @paper.set
+    if @chartProps.pDots?.length
+      do @chartProps.pDots.remove
+      delete @chartProps.pDots
+    @chartProps.pDots = do @paper.set
 
     # Create X-Axis labels from date array
     labels = _.map activeXData, (date) -> do date.getDate + "-" + months[do date.getMonth]
 
     #draw labels
-    @chartProps.yLabels = drawYLabels @paper, leftgutter + X * .5, topgutter + .5, @options.height - topgutter - bottomgutter, 8, yRange
+    @chartProps.primaryYLabels = drawYLabels @paper, leftgutter + X * .5, topgutter + .5, @options.height - topgutter - bottomgutter, 8, yRange
     
     #draw chart
-    @chartProps.linepath.attr lineAttr
+    @chartProps.primaryPath.attr lineAttr
 
     #set event functions
     if not @events.hover.overFn
@@ -364,7 +535,7 @@ class global.BGraph
     for i in [0...gridRange]
       oldX = x
       oldY = y
-      y = @options.height - bottomgutter - Y * (activeYData[i] - min)
+      y = @options.height - bottomgutter - Y * (activePrimaryYData[i] - min)
       x = Math.round leftgutter + X * (i + .5)
 
       if i is 0
@@ -373,10 +544,10 @@ class global.BGraph
         oldY2 = y
         subPathLen = 0
       if i isnt 0 and i < gridRange
-        Y0 = @options.height - bottomgutter - Y * (activeYData[i - 1] - min)
+        Y0 = @options.height - bottomgutter - Y * (activePrimaryYData[i - 1] - min)
         X0 = Math.round leftgutter + X * (i - .5)
-        if activeYData[i + 1]
-          Y2 = @options.height - bottomgutter - Y * (activeYData[i + 1] - min)
+        if activePrimaryYData[i + 1]
+          Y2 = @options.height - bottomgutter - Y * (activePrimaryYData[i + 1] - min)
           X2 = Math.round leftgutter + X * (i + 1.5)
         else
           Y2 = y
@@ -394,25 +565,25 @@ class global.BGraph
         lineRect = @paper.path rectPath
         lineRect.attr bpAttr
 
-        @chartProps.blanket.push lineRect
-        blanketLength = @chartProps.blanket.length
+        @chartProps.pBlanket.push lineRect
+        pBlanketLength = @chartProps.pBlanket.length
       
-        attachHover.call @, lineRect, blanketLength - 1, @events.hover.overFn, @events.hover.outFn, @chartProps.dots, @chartProps.blanket, activeXData, activeYData
+        attachHover.call @, lineRect, pBlanketLength - 1, @events.hover.overFn, @events.hover.outFn, @chartProps.pDots, @chartProps.pBlanket, activeXData, activePrimaryYData
 
         oldX2 = a.x2
         oldY2 = a.y2
 
-      @chartProps.dots.push @paper.circle(x, y, 4).attr dotAttr
+      @chartProps.pDots.push @paper.circle(x, y, 4).attr dotAttr
       @chartProps.xLabels.push (@paper.text x, @options.height - 25, labels[i]).attr(txt).toBack().rotate 90
       
     rectPath = Raphael.getSubpath pathString, pathLen - subPathLen / 2, pathLen
     lineRect = @paper.path rectPath
     lineRect.attr bpAttr
 
-    @chartProps.blanket.push lineRect
-    blanketLength = @chartProps.blanket.length
-    attachHover.call @, lineRect, blanketLength - 1, @events.hover.overFn, @events.hover.outFn, @chartProps.dots, @chartProps.blanket, activeXData, activeYData
+    @chartProps.pBlanket.push lineRect
+    pBlanketLength = @chartProps.pBlanket.length
+    attachHover.call @, lineRect, pBlanketLength - 1, @events.hover.overFn, @events.hover.outFn, @chartProps.pDots, @chartProps.pBlanket, activeXData, activePrimaryYData
 
-    @chartProps.linepath.attr path: p
-    do @chartProps.blanket.toFront
+    @chartProps.primaryPath.attr path: p
+    do @chartProps.pBlanket.toFront
     @

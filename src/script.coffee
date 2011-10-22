@@ -25,6 +25,9 @@ $.getJSON '/tools/fiidii/serverscripts/fiidii.php', (response) ->
   
   window.response = response
   sortedCurr = prepareData response.c, "x"
+  sortedD = prepareData response.d, "x"
+
+  #loadGraph.setSecondaryData sortedD, "y"
   loadGraph.setData sortedCurr, "x", "u"
 
   #Load currency values
@@ -65,4 +68,5 @@ $.getJSON '/tools/fiidii/serverscripts/fiidii.php', (response) ->
   do label.hide
   frame = (r.popup 100, 100, label, "right").attr(fill: "#F9FAFC", stroke: "#DBDCDE", "stroke-width": 1, "fill-opacity": 1).hide()
   loadGraph.setHoverLabels null, '#{y} Rupees = 1 USD'
-  loadGraph.draw -25
+  loadGraph.setSecondaryHoverLabels null, '#{y} thousand crores'
+  loadGraph.draw false, -25
