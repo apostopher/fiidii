@@ -27,12 +27,18 @@ class global.BGraph
       font         : '11px Helvetica, Arial'
       fill         : "#666"
   
-  txtLY         =
+  txtLY       =
     font         : '12px Helvetica, Arial', "font-weight": "bold"
     fill         : "#3C60A4"
-  txtLX        =
+
+  txtLX       =
     font         : '10px Helvetica, Arial'
     fill         : "#666"
+
+  bpAttr      =
+    "stroke-opacity" : "0.000001"
+    stroke           : "#FFF"
+    "stroke-width"   : "24"
 
   constructor: (@options) ->
 
@@ -128,8 +134,10 @@ class global.BGraph
     {startPoint, endPoint,  step}
 
   # Private method: Calculate anchors for smooth line graph.
-  # this is taken as-is from http://raphaeljs.com/analytics.html
   getAnchors = (p1x, p1y, p2x, p2y, p3x, p3y) ->
+    if p2x is p3x and p2y is p3y
+      return x1: p2x, y1: p2y, x2: p2x, y2: p2y
+
     l1 = (p2x - p1x) / 2
     l2 = (p3x - p2x) / 2
     a = Math.atan((p2x - p1x) / Math.abs(p2y - p1y))
@@ -332,7 +340,6 @@ class global.BGraph
       do @chartProps.linepath.remove
       delete @chartProps.linepath
     @chartProps.linepath = do @paper.path
-      
 
     if @chartProps.dots?.length
       do @chartProps.dots.remove
@@ -355,26 +362,57 @@ class global.BGraph
       @events.hover.outFn = outFn
     
     for i in [0...gridRange]
+      oldX = x
+      oldY = y
       y = @options.height - bottomgutter - Y * (activeYData[i] - min)
       x = Math.round leftgutter + X * (i + .5)
 
-      p = ["M", x, y, "C", x, y] if i is 0
-      if i isnt 0 and i < gridRange - 1
+      if i is 0
+        p = ["M", x, y, "C", x, y]
+        oldX2 = x
+        oldY2 = y
+        subPathLen = 0
+      if i isnt 0 and i < gridRange
         Y0 = @options.height - bottomgutter - Y * (activeYData[i - 1] - min)
         X0 = Math.round leftgutter + X * (i - .5)
-        Y2 = @options.height - bottomgutter - Y * (activeYData[i + 1] - min)
-        X2 = Math.round leftgutter + X * (i + 1.5)
+        if activeYData[i + 1]
+          Y2 = @options.height - bottomgutter - Y * (activeYData[i + 1] - min)
+          X2 = Math.round leftgutter + X * (i + 1.5)
+        else
+          Y2 = y
+          X2 = x
         a = getAnchors X0, Y0, x, y, X2, Y2
         p = p.concat [a.x1, a.y1, x, y, a.x2, a.y2]
+        
+        subPathString = ["M", oldX, oldY, "C", oldX2, oldY2, a.x1, a.y1, x, y].join ","
+        oldSubPathLen = subPathLen
+        subPathLen = Raphael.getTotalLength subPathString
+        pathString = p.join ","
+        pathLen = Raphael.getTotalLength pathString
+        rectPath = Raphael.getSubpath pathString, pathLen - subPathLen - oldSubPathLen / 2, pathLen - subPathLen / 2
+        
+        lineRect = @paper.path rectPath
+        lineRect.attr bpAttr
+
+        @chartProps.blanket.push lineRect
+        blanketLength = @chartProps.blanket.length
+      
+        attachHover.call @, lineRect, blanketLength - 1, @events.hover.overFn, @events.hover.outFn, @chartProps.dots, @chartProps.blanket, activeXData, activeYData
+
+        oldX2 = a.x2
+        oldY2 = a.y2
+
       @chartProps.dots.push @paper.circle(x, y, 4).attr dotAttr
       @chartProps.xLabels.push (@paper.text x, @options.height - 25, labels[i]).attr(txt).toBack().rotate 90
-      @chartProps.blanket.push (@paper.rect leftgutter + X * i, 0, X, @options.height - bottomgutter).attr blanketAttr
-      blanketLength = @chartProps.blanket.length
-      rect = @chartProps.blanket[blanketLength - 1]
       
-      attachHover.call @, rect, blanketLength - 1, @events.hover.overFn, @events.hover.outFn, @chartProps.dots, @chartProps.blanket, activeXData, activeYData
+    rectPath = Raphael.getSubpath pathString, pathLen - subPathLen / 2, pathLen
+    lineRect = @paper.path rectPath
+    lineRect.attr bpAttr
 
-    p = p.concat [x, y, x, y]
+    @chartProps.blanket.push lineRect
+    blanketLength = @chartProps.blanket.length
+    attachHover.call @, lineRect, blanketLength - 1, @events.hover.overFn, @events.hover.outFn, @chartProps.dots, @chartProps.blanket, activeXData, activeYData
+
     @chartProps.linepath.attr path: p
     do @chartProps.blanket.toFront
     @
