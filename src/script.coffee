@@ -24,12 +24,11 @@ $.getJSON '/tools/fiidii/serverscripts/fiidii.php', (response) ->
   months         =  ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
   
   window.response = response
+  loadGraph.setHoverLabels null, '#{y} thousand crores'
+  sortedData = prepareData response.d, "x"
+  loadGraph.setData sortedData, "x", "y"
+  
   sortedCurr = prepareData response.c, "x"
-  sortedD = prepareData response.d, "x"
-
-  #loadGraph.setSecondaryData sortedD, "y"
-  loadGraph.setData sortedCurr, "x", "u"
-
   #Load currency values
   latestRates = sortedCurr.slice(-1)[0]
   ($ "#usd").html latestRates.u
@@ -58,15 +57,48 @@ $.getJSON '/tools/fiidii/serverscripts/fiidii.php', (response) ->
   if fiidiinet < 0 then ($ "#fiidiinet").addClass "red"
   
   ($ "#tdspan").html response.t
-  
-  r = loadGraph.paper
-  label = do r.set
-  label_visible = false
-  leave_timer = 0
-  label.push (r.text 60, 12, "Rs.").attr txt
-  label.push (r.text 60, 27, "date").attr txt1
-  do label.hide
-  frame = (r.popup 100, 100, label, "right").attr(fill: "#F9FAFC", stroke: "#DBDCDE", "stroke-width": 1, "fill-opacity": 1).hide()
-  loadGraph.setHoverLabels null, '#{y} Rupees = 1 USD'
-  #loadGraph.setSecondaryHoverLabels null, '#{y} thousand crores'
+
   loadGraph.draw false, -25
+
+  #Add click handlers
+  ($ ".menuli a").click (eventObj) ->
+    do eventObj.preventDefault
+    ($ ".menuli a").removeClass "active"
+    dataLbl = ($ this).data "role"
+    switch dataLbl
+      when "fii"
+        loadGraph.setHoverLabels null, '#{y} thousand crores'
+        sortedData = prepareData response.d, "x"
+        loadGraph.setData sortedData, "x", "f"
+        ($ "#chartname").html "FII investment chart"
+        ($ "#charthelp").html "Data is in thousand crore ( 10 billion ) indian Rupees."
+      when "dii"
+        loadGraph.setHoverLabels null, '#{y} thousand crores'
+        sortedData = prepareData response.d, "x"
+        loadGraph.setData sortedData, "x", "d"
+        ($ "#chartname").html "DII investment chart"
+        ($ "#charthelp").html "Data is in thousand crore ( 10 billion ) indian Rupees."
+
+      when "fiidii"
+        loadGraph.setHoverLabels null, '#{y} thousand crores'
+        sortedData = prepareData response.d, "x"
+        loadGraph.setData sortedData, "x", "y"
+        ($ "#chartname").html "FII + DII investment chart"
+        ($ "#charthelp").html "Data is in thousand crore ( 10 billion ) indian Rupees."
+
+      when "nifty"
+        loadGraph.setHoverLabels null, '#{y}'
+        sortedData = prepareData response.i, "x"
+        loadGraph.setData sortedData, "x", "y"
+        ($ "#chartname").html "Nifty index chart"
+        ($ "#charthelp").html "Data is NSE Nifty index value."
+
+      when "curr"
+        loadGraph.setHoverLabels null, '#{y} Rupees = 1 USD'
+        loadGraph.setData sortedCurr, "x", "u"
+        ($ "#chartname").html "US $ currency chart"
+        ($ "#charthelp").html "Data is in Indian Rupees per USA dollar."
+
+    loadGraph.draw false, -25
+    ($ this).addClass "active"
+    true

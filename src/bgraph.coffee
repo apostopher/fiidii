@@ -50,29 +50,29 @@ class global.BGraph
     @paper = Raphael options.holder, options.width, options.height
 
     # These are the chart variables which depend on @paper
-    @chartProps  =
-      primaryYLabels      :  null
-      xLabels      :  null
-      chartMsg     :  null
-      pBlanket     :  null
-      pDots        :  null
-      primaryPath  :  null
-    
     @chartData     =
       primaryYData :  []
       xData        :  []
+    
+    @popup  =  yFormat :  '#{y}', xFormat : '#{x}'
 
     # Events object
     @events        =  hover :
                         overFn : null
                         outFn  : null
 
-    @popup         =  yFormat :  '#{y}', xFormat : '#{x}'
-
-    #get data from options.
-    if options.data
-      loadData options.data, options.type, options.xname, options.yname
+    initializeStage @
   
+  #Private method: This method initializes data
+  initializeStage = (thisArg) ->
+    thisArg.chartProps  =
+      primaryYLabels      :  null
+      xLabels             :  do thisArg.paper.set
+      chartMsg            :  null
+      pBlanket            :  do thisArg.paper.set
+      pDots               :  do thisArg.paper.set
+      primaryPath         :  do thisArg.paper.path
+
   # Private method: This method draws the graph grid.
   drawGrid = (r, x, y, w, h, wv, hv) ->
     grid = do r.set
@@ -300,23 +300,8 @@ class global.BGraph
     p = []
     
     # clear the stage
-    if @chartProps.primaryYLabels?.length
-      do @chartProps.primaryYLabels.remove
-      delete @chartProps.primaryYLabels
-
-    if @chartProps.xLabels?.length
-      do @chartProps.xLabels.remove
-      delete @chartProps.xLabels 
-    @chartProps.xLabels = do @paper.set
-      
-    if @chartProps.chartMsg?
-      do @chartProps.chartMsg.remove
-      delete @chartProps.chartMsg
-
-    if @chartProps.pBlanket?.length
-      do @chartProps.pBlanket.remove
-      delete @chartProps.pBlanket
-    @chartProps.pBlanket = do @paper.set
+    do @paper.clear
+    initializeStage @
 
     #set active data
     if end?
@@ -349,16 +334,6 @@ class global.BGraph
     if not @chartProps.grid
       @chartProps.grid = drawGrid @paper, leftgutter + X * .5, topgutter + .5, @options.width - leftgutter - rightgutter - X, @options.height - topgutter - bottomgutter, gridRange - 1, 8
 
-    if @chartProps.primaryPath?
-      do @chartProps.primaryPath.remove
-      delete @chartProps.primaryPath
-    @chartProps.primaryPath = do @paper.path
-
-    if @chartProps.pDots?.length
-      do @chartProps.pDots.remove
-      delete @chartProps.pDots
-    @chartProps.pDots = do @paper.set
-
     # Create X-Axis labels from date array
     labels = _.map activeXData, (date) -> do date.getDate + "-" + months[do date.getMonth]
 
@@ -369,10 +344,9 @@ class global.BGraph
     @chartProps.primaryPath.attr lineAttr
 
     #set event functions
-    if not @events.hover.overFn
-      {overFn, outFn} = do @defaultHoverFns
-      @events.hover.overFn = overFn
-      @events.hover.outFn = outFn
+    {overFn, outFn} = do @defaultHoverFns
+    @events.hover.overFn = overFn
+    @events.hover.outFn = outFn
     
     for i in [0...gridRange]
       oldX = x
