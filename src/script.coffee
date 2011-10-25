@@ -68,5 +68,5 @@ $.getJSON '/tools/fiidii/serverscripts/fiidii.php', (response) ->
   do label.hide
   frame = (r.popup 100, 100, label, "right").attr(fill: "#F9FAFC", stroke: "#DBDCDE", "stroke-width": 1, "fill-opacity": 1).hide()
   loadGraph.setHoverLabels null, '#{y} Rupees = 1 USD'
-  loadGraph.setSecondaryHoverLabels null, '#{y} thousand crores'
+  #loadGraph.setSecondaryHoverLabels null, '#{y} thousand crores'
   loadGraph.draw false, -25

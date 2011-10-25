@@ -17,19 +17,9 @@ class global.BGraph
       "stroke-width"    : 3
       "stroke-linejoin" : "round"
 
-  sLineAttr   =
-      stroke            : "#ddd"
-      "stroke-width"    : 2
-      "stroke-linejoin" : "round"
-
   dotAttr     =
       fill           : "#fff"
       stroke         : "#3C60A4"
-      "stroke-width" : 2
-  
-  sDotAttr     =
-      fill           : "#fff"
-      stroke         : "#ddd"
       "stroke-width" : 2
 
   pBlanketAttr =
@@ -41,20 +31,13 @@ class global.BGraph
       fill         : "#666"
   
   txtLY       =
-    font         : '12px Helvetica, Arial', "font-weight": "bold"
+    font         : '12px Helvetica, Arial'
+    "font-weight": "bold"
     fill         : "#3C60A4"
-  
-  txtSLY      =
-    font         : '12px Helvetica, Arial', "font-weight": "bold"
-    fill         : "#999"
 
   txtLX       =
     font         : '10px Helvetica, Arial'
     fill         : "#666"
-  
-  txtSLX       =
-    font         : '10px Helvetica, Arial'
-    fill         : "#999"
 
   bpAttr      =
     "stroke-opacity" : "0.000001"
@@ -71,31 +54,27 @@ class global.BGraph
       primaryYLabels      :  null
       xLabels      :  null
       chartMsg     :  null
-      pBlanket      :  null
-      pDots         :  null
-      primaryPath     :  null
+      pBlanket     :  null
+      pDots        :  null
+      primaryPath  :  null
     
     @chartData     =
-      primaryYData        :  []
+      primaryYData :  []
       xData        :  []
 
     # Events object
     @events        =  hover :
                         overFn : null
                         outFn  : null
-                      sHover:
-                        overFn : null
-                        outFn  : null
 
     @popup         =  yFormat :  '#{y}', xFormat : '#{x}'
-    @sPopup        =  yFormat :  '#{y}', xFormat : '#{x}'
 
     #get data from options.
     if options.data
       loadData options.data, options.type, options.xname, options.yname
   
   # Private method: This method draws the graph grid.
-  drawGrid = (r, x, y, w, h, wv, hv, secondaryDrawn = false) ->
+  drawGrid = (r, x, y, w, h, wv, hv) ->
     grid = do r.set
     gridPath = []
     axisPath = []
@@ -110,8 +89,6 @@ class global.BGraph
     
     axisPath = axisPath.concat ["M", xRound + .5, Math.round(y + hv * rowHeight) + .5, "H", Math.round(x + w) + .5]
     axisPath = axisPath.concat ["M", Math.round(x) + .5, Math.round(y) + .5, "V", Math.round(y + h) + .5]
-    if secondaryDrawn
-      axisPath = axisPath.concat ["M", Math.round(x + w) + .5, Math.round(y) + .5, "V", Math.round(y + h) + .5]
     
     hLines = r.path gridPath.join ","
     hLines.attr stroke: "#eee"
@@ -125,18 +102,22 @@ class global.BGraph
     grid
 
   # Private method: This method draws the Y-axis labels.
-  drawYLabels = (r, x, y, h, hv, yRange) ->
+  drawYLabels = (r, x, y, h, hv, yRange, w) ->
     xRound = Math.round x
     rowHeight = h / hv
-    primaryYLabels = do r.set
+    YLabels = do r.set
     for i in [0..hv]
       yStep = (yRange.endPoint - (i * yRange.step)).toFixed 2
       yLabel = r.text 0, Math.round(y + i * rowHeight) + .5, yStep
-      yWidth = yWidth || yLabel.getBBox().width
-      txtY.x = xRound - yWidth - 5
-      yLabel.attr(txtY).toBack()
-      primaryYLabels.push yLabel
-    primaryYLabels
+      if not w
+        yWidth = yLabel.getBBox().width
+        txtY.x = xRound - yWidth - 5
+      else
+        txtY.x = xRound + w + 5
+
+      do yLabel.attr(txtY).toBack
+      YLabels.push yLabel
+    YLabels
 
   # Private method: This method calculates the min and max Y values and step size
   # for Y labels. This method must be called after every update in order to
@@ -166,7 +147,7 @@ class global.BGraph
   # Private method: Calculate anchors for smooth line graph.
   getAnchors = (p1x, p1y, p2x, p2y, p3x, p3y) ->
     if p2x is p3x and p2y is p3y
-      return x1: p2x, y1: p2y, x2: p2x, y2: p2y
+      return x1: p2x, y1: p2y, x2: undefined, y2: undefined
 
     l1 = (p2x - p1x) / 2
     l2 = (p3x - p2x) / 2
@@ -199,26 +180,19 @@ class global.BGraph
     true
   
   # Public method: default over function
-  defaultHoverFns: (primary = true) ->
+  defaultHoverFns: () ->
     label = do @paper.set
     label_visible = false
     leave_timer = 0
     r = @paper
-    if primary
-      frameAttr = fill: "#F9FAFC", stroke: "#DBDCDE", "stroke-width": 1, "fill-opacity": 1
-      yLegend = @popup.yFormat
-      xLegend = @popup.xFormat
-      txtX = txtLX
-      txtY = txtLY
-    else
-      frameAttr = fill: "#F9F9F9", stroke: "#DDD", "stroke-width": 1, "fill-opacity": 1
-      yLegend = @sPopup.yFormat
-      xLegend = @sPopup.xFormat
-      txtX = txtSLX
-      txtY = txtSLY
+    frameAttr = fill: "#F9FAFC", stroke: "#DBDCDE", "stroke-width": 1, "fill-opacity": 1
+    yLegend = @popup.yFormat
+    xLegend = @popup.xFormat
+    textX = txtLX
+    textY = txtLY
 
-    label.push (@paper.text 60, 12, "").attr txtY
-    label.push (@paper.text 60, 27, "").attr txtX
+    label.push (@paper.text 60, 12, "").attr textY
+    label.push (@paper.text 60, 27, "").attr textX
     do label.hide
     frame = (@paper.popup 100, 100, label, "right").attr(frameAttr).hide()
 
@@ -259,13 +233,6 @@ class global.BGraph
 
     {overFn, outFn}
   
-  # Public methos: Set secondary data.
-  setSecondaryData: (data, yname = "y") ->
-    @options.sData = data
-    @options.sYName = yname
-    @chartData.secondaryYData = _.map data, (dataItem) -> +dataItem[yname] || 0
-    @
-
   # Public method: set the chart data. This is useful when chart data is received
   # in AJAX request. The loading message can be displayed till the data is received.
   setData: (data, xname = "x", yname = "y") ->
@@ -300,12 +267,6 @@ class global.BGraph
     @popup.xFormat = xL
     @popup.yFormat = yL
     @
-  
-  # Public method: set the labels for secondary popup
-  setSecondaryHoverLabels: (xL = '#{x}', yL = '#{y}') ->
-    @sPopup.xFormat = xL
-    @sPopup.yFormat = yL
-    @
        
   toString: ->
     "Bgraph version 0.2."
@@ -331,120 +292,6 @@ class global.BGraph
     @chartProps.chartMsg.push msg
     msg.animate {opacity: 1}, 200
     @
-  
-  #Private method: Draw the secondary line chart. The x-axis labels are shared.
-  drawSecondary = (selfRef, activeXData, start = 0, end) ->
-    s = []
-    if not selfRef.chartData.secondaryYData then return false
-    # clear the stage
-    if selfRef.chartProps.secondaryYLabels?.length
-      do selfRef.chartProps.secondaryYLabels.remove
-      delete selfRef.chartProps.secondaryYLabels
-    
-    if selfRef.chartProps.sBlanket?.length
-      do selfRef.chartProps.sBlanket.remove
-      delete selfRef.chartProps.sBlanket
-    selfRef.chartProps.sBlanket = do selfRef.paper.set
-    
-    #set active data
-    if end?
-      activeSecondaryYData = selfRef.chartData.secondaryYData.slice start, end
-    else
-      activeSecondaryYData = selfRef.chartData.secondaryYData.slice start
-    
-    gridRange = activeSecondaryYData.length
-    if not gridRange then return false
-    
-    # Get max and min of chart data
-    max = Math.max activeSecondaryYData...
-    min = Math.min activeSecondaryYData...
-    
-    yRange = getYRange 8, min, max
-    if yRange?
-      max = yRange.endPoint
-      min = yRange.startPoint
-    else
-      return false
-    
-    if selfRef.chartProps.secondaryPath?
-      do selfRef.chartProps.secondaryPath.remove
-      delete selfRef.chartProps.secondaryPath
-    selfRef.chartProps.secondaryPath = do selfRef.paper.path
-
-    if selfRef.chartProps.sDots?.length
-      do selfRef.chartProps.sDots.remove
-      delete selfRef.chartProps.sDots
-    selfRef.chartProps.sDots = do selfRef.paper.set
-    
-    X = (selfRef.options.width - leftgutter - rightgutter) / gridRange
-    Y = (selfRef.options.height - bottomgutter - topgutter) / (max - min)
-
-    #draw labels
-    #selfRef.chartProps.primaryYLabels = drawYLabels selfRef.paper, leftgutter + X * .5, topgutter + .5, selfRef.options.height - topgutter - bottomgutter, 8, yRange
-
-    #draw chart
-    selfRef.chartProps.secondaryPath.attr sLineAttr
-
-    #set event functions
-    if not selfRef.events.sHover.overFn
-      {overFn, outFn} = selfRef.defaultHoverFns false
-      selfRef.events.sHover.overFn = overFn
-      selfRef.events.sHover.outFn = outFn
-    
-    for i in [0...gridRange]
-      oldX = x
-      oldY = y
-      y = selfRef.options.height - bottomgutter - Y * (activeSecondaryYData[i] - min)
-      x = Math.round leftgutter + X * (i + .5)
-
-      if i is 0
-        s = ["M", x, y, "C", x, y]
-        oldX2 = x
-        oldY2 = y
-        subPathLen = 0
-      if i isnt 0 and i < gridRange
-        Y0 = selfRef.options.height - bottomgutter - Y * (activeSecondaryYData[i - 1] - min)
-        X0 = Math.round leftgutter + X * (i - .5)
-        if activeSecondaryYData[i + 1]
-          Y2 = selfRef.options.height - bottomgutter - Y * (activeSecondaryYData[i + 1] - min)
-          X2 = Math.round leftgutter + X * (i + 1.5)
-        else
-          Y2 = y
-          X2 = x
-        a = getAnchors X0, Y0, x, y, X2, Y2
-        s = s.concat [a.x1, a.y1, x, y, a.x2, a.y2]
-        
-        subPathString = ["M", oldX, oldY, "C", oldX2, oldY2, a.x1, a.y1, x, y].join ","
-        oldSubPathLen = subPathLen
-        subPathLen = Raphael.getTotalLength subPathString
-        pathString = s.join ","
-        pathLen = Raphael.getTotalLength pathString
-        rectPath = Raphael.getSubpath pathString, pathLen - subPathLen - oldSubPathLen / 2, pathLen - subPathLen / 2
-        
-        lineRect = selfRef.paper.path rectPath
-        lineRect.attr bpAttr
-
-        selfRef.chartProps.sBlanket.push lineRect
-        pBlanketLength = selfRef.chartProps.sBlanket.length
-      
-        attachHover.call selfRef, lineRect, pBlanketLength - 1, selfRef.events.sHover.overFn, selfRef.events.sHover.outFn, selfRef.chartProps.sDots, selfRef.chartProps.sBlanket, activeXData, activeSecondaryYData
-
-        oldX2 = a.x2
-        oldY2 = a.y2
-
-      selfRef.chartProps.sDots.push selfRef.paper.circle(x, y, 4).attr sDotAttr
-      
-    rectPath = Raphael.getSubpath pathString, pathLen - subPathLen / 2, pathLen
-    lineRect = selfRef.paper.path rectPath
-    lineRect.attr bpAttr
-
-    selfRef.chartProps.sBlanket.push lineRect
-    pBlanketLength = selfRef.chartProps.sBlanket.length
-    attachHover.call selfRef, lineRect, pBlanketLength - 1, selfRef.events.sHover.overFn, selfRef.events.sHover.outFn, selfRef.chartProps.sDots, selfRef.chartProps.sBlanket, activeXData, activeSecondaryYData
-
-    selfRef.chartProps.secondaryPath.attr path: s
-    do selfRef.chartProps.sBlanket.toFront
-    true
 
   # Public method: This method accepts X and Y values and draws chart.
   # Currently this supports only one chart.
@@ -494,18 +341,13 @@ class global.BGraph
       min = yRange.startPoint
     else
       return self
-    
-    # Draw secondary chart first
-    secondaryDrawn = false
-    if not primaryOnly 
-      secondaryDrawn = drawSecondary @, activeXData, start, end
 
     # Draw the grid
     X = (@options.width - leftgutter - rightgutter) / gridRange
     Y = (@options.height - bottomgutter - topgutter) / (max - min)
 
     if not @chartProps.grid
-      @chartProps.grid = drawGrid @paper, leftgutter + X * .5, topgutter + .5, @options.width - leftgutter - rightgutter - X, @options.height - topgutter - bottomgutter, gridRange - 1, 8, secondaryDrawn
+      @chartProps.grid = drawGrid @paper, leftgutter + X * .5, topgutter + .5, @options.width - leftgutter - rightgutter - X, @options.height - topgutter - bottomgutter, gridRange - 1, 8
 
     if @chartProps.primaryPath?
       do @chartProps.primaryPath.remove
@@ -553,7 +395,10 @@ class global.BGraph
           Y2 = y
           X2 = x
         a = getAnchors X0, Y0, x, y, X2, Y2
-        p = p.concat [a.x1, a.y1, x, y, a.x2, a.y2]
+        if a.x2 and a.y2
+          p = p.concat [a.x1, a.y1, x, y, a.x2, a.y2]
+        else
+          p = p.concat [a.x1, a.y1, x, y]
         
         subPathString = ["M", oldX, oldY, "C", oldX2, oldY2, a.x1, a.y1, x, y].join ","
         oldSubPathLen = subPathLen

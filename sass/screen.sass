@@ -14,6 +14,13 @@ h2
     size           :   16px
     weight         :   500
 
+p
+  color            :   $p_text_color
+  font:
+    size           :   $p_text_size
+    weight         :   500
+  line-height      :   $p_line_height
+
 #fiidiiheader
   background       :   $default_background
   border-bottom    :   1px solid $default_border
@@ -53,9 +60,6 @@ h2
       size         :   16px
     line-height    :   1.5em
   
-  p
-    color          :   $p_text_color
-    font-size      :   14px
 
 #statsholder
   background       :   $default_background
@@ -70,7 +74,7 @@ h2
   
     .column
       float        :   left
-      width        :   ($content_width - (2 * $default_space)) / 3
+      width        :   ($content_width - (($num_column - 1) * $default_space)) / $num_column
       margin-right :   $default_space
     
     .lastcolumn
@@ -83,13 +87,60 @@ h2
         size       :   16px
         weight     :   500
     p
-      color        :   $p_text_color
-      font:
-        size       :   $p_text_size
-        weight     :   500
-      line-height  :   $p_line_height
       text-align   :   justify
 
+#charttype
+  margin-top     :   $default_space
+
+.menuul
+  overflow       :   hidden
+  width          :   $menu_width
+  margin         :   0 auto
+  padding        :   $default_space 0
+
+.menuli
+  float            :   left
+  border-top       :   1px solid $default_border
+
+  a
+    display          :   block
+    text-decoration  :   none
+    width            :   $menu_item_width
+    padding          :   $default_space / 2
+    text-align       :   center
+    position         :   relative
+    border           :   1px solid white
+    border-top       :   0
+
+    .arrow
+      display        :   none
+      position       :   absolute
+      top            :   -10px
+      height         :   10px
+      left           :   0
+      width          :   $menu_item_width + $default_space
+      background     :   url("../img/arrow.png") no-repeat top center
+    h2
+      color          :   #666
+      font-weight    :   800
+      margin-top     :   0
+    &:hover
+      h2
+        color        :   #111
+      p
+        color        :   #444
+
+    &.active
+      background     :   $active_blue
+      +background-image(linear-gradient(#446fba, $active_blue))
+      +border-bottom-radius(4px)
+      border         :   1px solid #265d84
+      border-top     :   0
+      h2, p
+        color        :   white
+      .arrow
+        display      :   block
+    
 #datadiv
   margin-top       :   $default_space
 
@@ -144,7 +195,7 @@ h2
     width          :   80px
     margin         :   20px auto
     padding        :   4px
-    background     :   #3c60a4
+    background     :   $active_blue
     background:
       repeat       :   no-repeat
     border         :   1px solid #265d84
@@ -189,11 +240,6 @@ h2
   padding          :   $default_space 0
 
   p
-    color          :   $p_text_color
-    font:
-      size         :   $p_text_size
-      weight       :   500
-    line-height    :   $p_line_height
     text-align     :   justify
 
 #comments
