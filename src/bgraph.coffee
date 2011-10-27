@@ -53,7 +53,8 @@ class global.BGraph
     @chartData     =
       primaryYData :  []
       xData        :  []
-    
+      cache        :  {}
+
     @popup  =  yFormat :  '#{y}', xFormat : '#{x}'
 
     # Events object
@@ -235,19 +236,25 @@ class global.BGraph
   
   # Public method: set the chart data. This is useful when chart data is received
   # in AJAX request. The loading message can be displayed till the data is received.
-  setData: (data, xname = "x", yname = "y") ->
-    @options.data = data
-    @options.xname = xname
-    @options.yname = yname
-    
-    @chartData.primaryYData = _.map data, (dataItem) -> +dataItem[yname] || 0
-    if @options.type is "l"
-      # Accept dates as string and create date objects from it.
-      @chartData.xData = _.map data, (dataItem) ->
-        dateArray = dataItem[xname].split "-"
-        new Date dateArray[0], dateArray[1] - 1, dateArray[2]
+  setData: (data, xname = "x", yname = "y", dataname = "fiidii") ->
+    if @chartData.cache[dataname]
+      @chartData.primaryYData = @chartData.cache[dataname].y
+      @chartData.xData = @chartData.cache[dataname].x
     else
-      @chartData.xData = _.map data, (dataItem) -> dataItem.x
+      @chartData.primaryYData = _.map data, (dataItem) -> +dataItem[yname] || 0
+      if @options.type is "l"
+        # Accept dates as string and create date objects from it.
+        @chartData.xData = _.map data, (dataItem) ->
+          dateArray = dataItem[xname].split "-"
+          new Date dateArray[0], dateArray[1] - 1, dateArray[2]
+
+      else
+        @chartData.xData = _.map data, (dataItem) -> dataItem.x
+
+      @chartData.cache[dataname] = x: @chartData.xData, y: @chartData.primaryYData
+      setTimeout =>
+        delete @chartData.cache[dataname]
+      , 3000
     @
 
   # Public method: attach user-specific hover event handlers to pBlanket elements.
@@ -283,8 +290,7 @@ class global.BGraph
       opacity      : 0
 
     # chartMsg is a set of messages. Can hold multiple messages
-    do @chartProps.chartMsg?.remove
-    delete @chartProps.chartMsg
+    do @paper.clear
     @chartProps.chartMsg = do @paper.set
     msg = (@paper.text @options.width / 2, @options.height / 2, message).attr (style ? txtMsg)
 
@@ -359,6 +365,7 @@ class global.BGraph
         oldX2 = x
         oldY2 = y
         subPathLen = 0
+        pathLen = 0
       if i isnt 0 and i < gridRange
         Y0 = @options.height - bottomgutter - Y * (activePrimaryYData[i - 1] - min)
         X0 = Math.round leftgutter + X * (i - .5)
@@ -378,7 +385,7 @@ class global.BGraph
         oldSubPathLen = subPathLen
         subPathLen = Raphael.getTotalLength subPathString
         pathString = p.join ","
-        pathLen = Raphael.getTotalLength pathString
+        pathLen = pathLen + subPathLen
         rectPath = Raphael.getSubpath pathString, pathLen - subPathLen - oldSubPathLen / 2, pathLen - subPathLen / 2
         
         lineRect = @paper.path rectPath

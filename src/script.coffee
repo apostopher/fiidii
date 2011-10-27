@@ -1,4 +1,9 @@
-window.loadGraph = new BGraph holder: "chartcontent", height: 500, type: "l"
+sortedFiiData = null
+sortedDiiData = null
+sortedFiiDiiData = null
+sortedNiftyData = null
+sortedCurrData = null
+loadGraph = new BGraph holder: "chartcontent", height: 500, type: "l"
 loadGraph.setMessage "Loading..."
 
 prepareData = (rawData, dateField) ->
@@ -28,9 +33,9 @@ $.getJSON '/tools/fiidii/serverscripts/fiidii.php', (response) ->
   sortedData = prepareData response.d, "x"
   loadGraph.setData sortedData, "x", "y"
   
-  sortedCurr = prepareData response.c, "x"
+  sortedCurrData = prepareData response.c, "x"
   #Load currency values
-  latestRates = sortedCurr.slice(-1)[0]
+  latestRates = sortedCurrData.slice(-1)[0]
   ($ "#usd").html latestRates.u
   ($ "#gbp").html latestRates.g
   ($ "#euro").html latestRates.e
@@ -63,42 +68,52 @@ $.getJSON '/tools/fiidii/serverscripts/fiidii.php', (response) ->
   #Add click handlers
   ($ ".menuli a").click (eventObj) ->
     do eventObj.preventDefault
+    if ($ this).hasClass "active" then return true
     ($ ".menuli a").removeClass "active"
+    ($ this).addClass "active"
     dataLbl = ($ this).data "role"
+    loadGraph.setMessage "Loading..."
     switch dataLbl
       when "fii"
         loadGraph.setHoverLabels null, '#{y} thousand crores'
-        sortedData = prepareData response.d, "x"
-        loadGraph.setData sortedData, "x", "f"
+        if not sortedFiiData
+          sortedFiiData = prepareData response.d, "x"
+        loadGraph.setData sortedFiiData, "x", "f", "fii"
         ($ "#chartname").html "FII investment chart"
         ($ "#charthelp").html "Data is in thousand crore ( 10 billion ) indian Rupees."
       when "dii"
         loadGraph.setHoverLabels null, '#{y} thousand crores'
-        sortedData = prepareData response.d, "x"
-        loadGraph.setData sortedData, "x", "d"
+        if not sortedDiiData
+          sortedDiiData = prepareData response.d, "x"
+        loadGraph.setData sortedDiiData, "x", "d", "dii"
         ($ "#chartname").html "DII investment chart"
         ($ "#charthelp").html "Data is in thousand crore ( 10 billion ) indian Rupees."
 
       when "fiidii"
         loadGraph.setHoverLabels null, '#{y} thousand crores'
-        sortedData = prepareData response.d, "x"
-        loadGraph.setData sortedData, "x", "y"
+        if not sortedFiiDiiData
+          sortedFiiDiiData = prepareData response.d, "x"
+        loadGraph.setData sortedFiiDiiData, "x", "y", "fiidii"
         ($ "#chartname").html "FII + DII investment chart"
         ($ "#charthelp").html "Data is in thousand crore ( 10 billion ) indian Rupees."
 
       when "nifty"
         loadGraph.setHoverLabels null, '#{y}'
-        sortedData = prepareData response.i, "x"
-        loadGraph.setData sortedData, "x", "y"
+        if not sortedNiftyData
+          sortedNiftyData = prepareData response.i, "x"
+        loadGraph.setData sortedNiftyData, "x", "y", "nifty"
         ($ "#chartname").html "Nifty index chart"
         ($ "#charthelp").html "Data is NSE Nifty index value."
 
       when "curr"
         loadGraph.setHoverLabels null, '#{y} Rupees = 1 USD'
-        loadGraph.setData sortedCurr, "x", "u"
+        loadGraph.setData sortedCurrData, "x", "u", "curr"
         ($ "#chartname").html "US $ currency chart"
         ($ "#charthelp").html "Data is in Indian Rupees per USA dollar."
 
     loadGraph.draw false, -25
-    ($ this).addClass "active"
     true
+  
+  ($ "#twitterfollow").click (eventObj) ->
+    do eventObj.preventDefault
+    return false
