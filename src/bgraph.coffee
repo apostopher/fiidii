@@ -41,7 +41,7 @@ class global.BGraph
 
   bpAttr      =
     "stroke-opacity" : "0.000001"
-    stroke           : "#FFF"
+    stroke           : "#fff"
     "stroke-width"   : "30"
 
   constructor: (@options) ->
@@ -366,6 +366,7 @@ class global.BGraph
         oldY2 = y
         subPathLen = 0
         pathLen = 0
+        subPathString = ""
       if i isnt 0 and i < gridRange
         Y0 = @options.height - bottomgutter - Y * (activePrimaryYData[i - 1] - min)
         X0 = Math.round leftgutter + X * (i - .5)
@@ -380,12 +381,13 @@ class global.BGraph
           p = p.concat [a.x1, a.y1, x, y, a.x2, a.y2]
         else
           p = p.concat [a.x1, a.y1, x, y]
-        
+
+        oldSubPathString = subPathString
         subPathString = ["M", oldX, oldY, "C", oldX2, oldY2, a.x1, a.y1, x, y].join ","
         oldSubPathLen = subPathLen
         subPathLen = Raphael.getTotalLength subPathString
-        pathString = p.join ","
-        pathLen = pathLen + subPathLen
+        pathString = oldSubPathString + subPathString
+        pathLen = oldSubPathLen + subPathLen
         rectPath = Raphael.getSubpath pathString, pathLen - subPathLen - oldSubPathLen / 2, pathLen - subPathLen / 2
         
         lineRect = @paper.path rectPath
