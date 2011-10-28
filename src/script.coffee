@@ -28,7 +28,6 @@ $.getJSON '/tools/fiidii/serverscripts/fiidii.php', (response) ->
     fill         : "#666"
   months         =  ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
   
-  window.response = response
   loadGraph.setHoverLabels null, '#{y} thousand crores'
   sortedData = prepareData response.d, "x"
   loadGraph.setData sortedData, "x", "y"

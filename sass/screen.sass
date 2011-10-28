@@ -67,11 +67,11 @@ p
   border-top       :   1px solid $default_border
 
   #statscontent
-    overflow       :   hidden
     width          :   $content_width
     margin         :   0 auto
     padding        :   $default_space / 3 0
-  
+    +legacy-pie-clearfix
+
     .column
       float        :   left
       width        :   ($content_width - (($num_column - 1) * $default_space)) / $num_column
@@ -90,10 +90,10 @@ p
       text-align   :   justify
     
     #socialico
-      overflow     :   hidden
       width        :   $social_width
       margin       :   $default_space / 3 auto
-    
+      +legacy-pie-clearfix
+
       h2
         text-align :   center
 
@@ -106,10 +106,10 @@ p
   margin-top     :   $default_space
 
 .menuul
-  overflow       :   hidden
   width          :   $menu_width
   margin         :   0 auto
   padding        :   $default_space 0
+  +legacy-pie-clearfix
 
 .menuli
   float            :   left
