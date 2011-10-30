@@ -241,15 +241,15 @@ class global.BGraph
       @chartData.primaryYData = @chartData.cache[dataname].y
       @chartData.xData = @chartData.cache[dataname].x
     else
-      @chartData.primaryYData = _.map data, (dataItem) -> +dataItem[yname] || 0
+      @chartData.primaryYData = map data, (dataItem) -> +dataItem[yname] || 0
       if @options.type is "l"
         # Accept dates as string and create date objects from it.
-        @chartData.xData = _.map data, (dataItem) ->
+        @chartData.xData = map data, (dataItem) ->
           dateArray = dataItem[xname].split "-"
           new Date dateArray[0], dateArray[1] - 1, dateArray[2]
 
       else
-        @chartData.xData = _.map data, (dataItem) -> dataItem.x
+        @chartData.xData = map data, (dataItem) -> dataItem.x
 
       @chartData.cache[dataname] = x: @chartData.xData, y: @chartData.primaryYData
       setTimeout =>
@@ -341,7 +341,7 @@ class global.BGraph
       @chartProps.grid = drawGrid @paper, leftgutter + X * .5, topgutter + .5, @options.width - leftgutter - rightgutter - X, @options.height - topgutter - bottomgutter, gridRange - 1, 8
 
     # Create X-Axis labels from date array
-    labels = _.map activeXData, (date) -> do date.getDate + "-" + months[do date.getMonth]
+    labels = map activeXData, (date) -> do date.getDate + "-" + months[do date.getMonth]
 
     #draw labels
     @chartProps.primaryYLabels = drawYLabels @paper, leftgutter + X * .5, topgutter + .5, @options.height - topgutter - bottomgutter, 8, yRange

@@ -3,45 +3,42 @@ fs     = require 'fs'
 
 appFiles  = [
   # omit src/ and .coffee to make the below lines a little shorter
-  'bgraph'
-  'script'
+  { name: 'utils', options: "--bare" }
+  { name: 'popup', options: "" }
+  { name: 'bgraph', options: "" }
+  { name: 'script', options: "" }
 ]
 libFiles  = [
-  'lib/popup.js'
-  'lib/raphael-2.0.0.min.js'
-  'lib/underscore-1.2.0.min.js'
+  'lib/underscore-1.2.1.js'
+  'lib/raphael-2.0.js'
 ]
 task 'compile', 'Compile individual files debug-friendly', ->
   for file, index in appFiles then do (file, index) ->
-    exec "coffee --output lib --compile src/#{file}.coffee", (err, stdout, stderr) ->
+    exec "coffee --output lib #{file.options} --compile src/#{file.name}.coffee", (err, stdout, stderr) ->
       throw err if err
       console.log stdout + stderr
 
 task 'build', 'Build single application file from source files', ->
+  invoke 'compile'
   appContents = new Array remaining = appFiles.length
   for file, index in appFiles then do (file, index) ->
-    appContents[index] = fs.readFileSync "src/#{file}.coffee", 'utf8'
-      
-  fs.writeFileSync 'lib/app.coffee', appContents.join('\n\n'), 'utf8'
-  exec 'coffee --compile lib/app.coffee', (err, stdout, stderr) ->
-    throw err if err
-    console.log stdout + stderr
-    fs.unlink 'lib/app.coffee', (err) ->
-      throw err if err
-
+    appContents[index] = fs.readFileSync "lib/#{file.name}.js", 'utf8'
+  
+  fs.writeFileSync 'lib/app.js', appContents.join('\n\n'), 'utf8'
+  
 task 'buildlib', 'Builds a single lib file from all lib files', ->
   libContents = new Array remaining = libFiles.length
   for file, index in libFiles then do (file, index) ->
     libContents[index] = fs.readFileSync file, 'utf8'
    
-  fs.writeFileSync 'lib/lib.js', libContents.join('\n\n'), 'utf8'
+  fs.writeFileSync 'lib/lib.js', libContents.join('\n'), 'utf8'
 
 task 'buildall', 'Builds single application file from all js files including libraries', ->
-  invoke 'build'
   invoke 'buildlib'
+  invoke 'build'
   allContent = new Array
-  allContent.push fs.readFileSync 'lib/app.js', 'utf8'
   allContent.push fs.readFileSync 'lib/lib.js', 'utf8'
+  allContent.push fs.readFileSync 'lib/app.js', 'utf8'
   
   fs.writeFileSync 'lib/app-all.js', allContent.join('\n\n'), 'utf8'
 
