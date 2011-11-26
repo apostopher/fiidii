@@ -67,6 +67,7 @@ $.getJSON '/tools/fiidii/serverscripts/fiidii.php', (response) ->
   #Add click handlers
   ($ ".menuli a").click (eventObj) ->
     do eventObj.preventDefault
+    do eventObj.stopPropagation
     if ($ this).hasClass "active" then return true
     ($ ".menuli a").removeClass "active"
     ($ this).addClass "active"
@@ -115,4 +116,5 @@ $.getJSON '/tools/fiidii/serverscripts/fiidii.php', (response) ->
   
   ($ "#twitterfollow").click (eventObj) ->
     do eventObj.preventDefault
+    do eventObj.stopPropagation
     return false
