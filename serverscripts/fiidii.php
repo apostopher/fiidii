@@ -50,7 +50,7 @@ if($dloadrequest == "dl"){
         $csvstr = $csvstr.$dlrow['fiidii_date'].",".$dlrow['fii'].",".$dlrow['dii']."\n";
       }
     }
-    $csvstr = $csvstr."=HYPERLINK(\"http://blackbull.in/tools/fiidii/index.php\")\n";
+    $csvstr = $csvstr."=HYPERLINK(\"http://blackbull.in/tools/fiidii/\")\n";
   }else{
     $csvstr = "Sorry. Some error occured. :(";
   }
