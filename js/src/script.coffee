@@ -29,6 +29,10 @@ $ ->
       fill         : "#666"
     months         =  ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     
+    # Add to localStorage
+    if Modernizr.localstorage
+      localStorage["response"] = JSON.stringify response
+
     loadGraph.setHoverLabels null, '#{y} thousand crores'
     sortedData = prepareData response.d, "x"
     loadGraph.setData sortedData, "x", "y"
