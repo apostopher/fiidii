@@ -43,12 +43,12 @@ task 'buildall', 'Builds single application file from all js files including lib
   fs.writeFileSync 'libs/app.js', allContent.join('\n\n'), 'utf8'
 
 task 'minify', 'Minify the resulting application file after build', ->
-  exec 'java -jar "tools/compiler.jar" --js libs/app.js libs/json2.js --js_output_file libs/app.min.js', (err, stdout, stderr) ->
+  exec 'java -jar "tools/compiler.jar" --js libs/raphael.js libs/json2.js libs/app.js --js_output_file libs/app.min.js', (err, stdout, stderr) ->
     throw err if err
     console.log stdout + stderr
 
 task 'minifyXtreme', 'Minify maximum possible using ADVANCED_OPTIMIZATIONS', ->
-  exec 'java -jar "tools/compiler.jar" --js libs/app-all.js libs/json2.js --compilation_level ADVANCED_OPTIMIZATIONS --js_output_file libs/app-all.min.js', (err, stdout, stderr) ->
+  exec 'java -jar "tools/compiler.jar" --js libs/raphael.js libs/json2.js libs/app-all.js --compilation_level ADVANCED_OPTIMIZATIONS --js_output_file libs/app-all.min.js', (err, stdout, stderr) ->
     throw err if err
 
 task 'publish', 'Build and minify project files. Ready for production', ->
